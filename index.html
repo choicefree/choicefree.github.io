@@ -365,9 +365,9 @@
 
 
                     var spinner = new Spinner();
-                    spinner.show(true);
+                    //spinner.show(true);
 
-                    new Request.JSON({url:'ud', noCache:true}).get({period:21, ms:new URI(window.href).getData('ms')}).addEvents({
+                    /*new Request.JSON({url:'ud', noCache:true}).get({period:21, ms:new URI(window.href).getData('ms')}).addEvents({
 
                         onSuccess: setUserData.bind({cache:cache, index:index, spinner:spinner, hcache:hcache}),
 
@@ -380,7 +380,7 @@
                                 history.back();
                             }
                         }
-                    });
+                    });*/
 
                     showWelcome();
 
