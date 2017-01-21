@@ -1,0 +1,4 @@
+var List=new Class({initialize:function(c,b,a){this.id=c;
+this.name=b&&b.trim();this.ids=a;this.ids&&this.ids.sort()
+},contains:function(a){return this.ids.indexOf(a.id)>=0
+}});

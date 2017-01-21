@@ -1,2 +1,786 @@
-Hello World
- new branch
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0047)https://choicefreak.appspot.com/tech/?period=21 -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>הטכניון - מערכת שעות אביב תשע"ז</title>
+    <meta name="description" content="הטכניון - בניית מערכת שעות לסמסטר אביב תשע&quot;ז">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://choicefreak.appspot.com/tech/">
+    <meta property="og:title" content="ChoiceFreak for הטכניון">
+    <meta property="og:description" content="כלי פשוט לבניית מערכת שעות">
+    <meta property="og:locale" content="he_IL">
+    <meta property="fb:admins" content="615469488">
+    <meta property="og:image" content="http://choicefreak.appspot.com/media/images/fb_image.png">
+    <meta property="og:image:width" content="1155">
+    <meta property="og:image:height" content="801">
+
+    <link rel="stylesheet" href="./הטכניון - מערכת שעות אביב תשע_ז_files/main.css" type="text/css">
+    <link rel="stylesheet" href="./הטכניון - מערכת שעות אביב תשע_ז_files/metro.css" type="text/css">
+
+    <!--[if lt IE 7]>
+    <![endif]-->
+
+    <!--[if IE 7]>
+    <![endif]-->
+
+    <script charset="UTF-8" type="text/javascript" src="./הטכניון - מערכת שעות אביב תשע_ז_files/mootools-1.2.4-core.js.download"> </script>
+    <script charset="UTF-8" type="text/javascript" src="./הטכניון - מערכת שעות אביב תשע_ז_files/mootools-1.2.4.2-more.js.download"> </script>
+    <!--[if lt IE 7]>
+      <script charset="UTF-8" type="text/javascript" src="/media/js/mootools-1.2.4.2-more.uncmp.js" > </script>
+    <![endif]-->
+    <script charset="UTF-8" type="text/javascript" src="./הטכניון - מערכת שעות אביב תשע_ז_files/clientcide.2.2.0.cmp.js.download"> </script>
+
+    <script charset="UTF-8" type="text/javascript" src="./הטכניון - מערכת שעות אביב תשע_ז_files/multiselect.js.download"></script>
+
+    <script charset="UTF-8" type="text/javascript" src="./הטכניון - מערכת שעות אביב תשע_ז_files/schedule.js.download"></script>
+
+    <script charset="UTF-8" type="text/javascript" src="./הטכניון - מערכת שעות אביב תשע_ז_files/friends.js.download"></script>
+    <script charset="UTF-8" type="text/javascript" src="./הטכניון - מערכת שעות אביב תשע_ז_files/exams.js.download"></script>
+
+    <script charset="UTF-8" type="text/javascript" src="./הטכניון - מערכת שעות אביב תשע_ז_files/lists.js.download"></script>
+    <script charset="UTF-8" type="text/javascript" src="./הטכניון - מערכת שעות אביב תשע_ז_files/operator.js.download"></script>
+
+    <script charset="UTF-8" type="text/javascript" src="./הטכניון - מערכת שעות אביב תשע_ז_files/index.js.download"></script>
+
+    <script charset="UTF-8" type="text/javascript">
+
+        var exams_on = false,
+            buy_items = [];
+
+        function applySelChanges(evt)
+        {
+            if (evt.persisted)
+            {
+                if (window.mysel && window.mysel.changes.length > 0)
+                {
+                    window.mysel.ui.fireEvent('save', [true]);
+                    window.mysel.applyChanges();
+                }
+            }
+        }
+
+        function checkPeriods(evt)
+        {
+            if (evt.persisted)
+            {
+                var sper = document.id('s_period');
+                sper && sper.set('value', 21);
+                Cookie.write('selper', 21);
+            }
+        }
+
+    
+
+        function showWelcome()
+        {
+            var uri = new URI(window.location.href);
+            if (uri.getData('thank') == '1')
+            {
+                var stiw = new StickyWin({
+                    draggable: true,
+                    relativeTo: 'sw_table',
+                    position: 'center',
+                    showNow: true,
+                    offset: {x:-30},
+                    content: StickyWin.ui('התשלום נקלט בהלצחה', document.id('welcome'),
+                    {
+                        width: '30em',
+                        cornerHandle: false,
+                        buttons: [
+                            {
+                                text: 'סגור',
+                                properties: {close:true}
+                            }
+                         ]
+                     }),
+                    onClose: function()
+                    {
+                        if (window.location.href.match(/thank=1/))
+                            window.location.replace(window.location.href.replace('&thank=1', ''));
+                    }
+                });
+            }
+        }
+
+    
+
+        function setupExams()
+        {
+            $('showselectorcnt').set('tween', {unit: '%', duration:'short'});
+            $('examspanelcnt').set('tween', {duration: 'short'}).fade('hide');
+
+            $('exams_link').addEvent('click', function(evt){
+                evt.stop();
+                $('examspanelcnt').fade('toggle');
+                if (exams_on)
+                {
+                    $('showselectorcnt').tween('right', [25,20]);
+                    exams_on = false;
+                }
+                else
+                {
+                    $('showselectorcnt').tween('right', [20,25]);
+                    exams_on = true;
+                }
+                evt.target.blur();
+            });
+        }
+
+        function setUserData(ud) {
+
+            var weights = ud.rweights, related = {};
+
+            if (weights == null)
+                weights = {
+                    '1': {
+                        w: 75,
+                        attribs: {
+                            '1': 50,
+                            '2': 50,
+                            '3': 50,
+                            '4': 50,
+                            '5': 50,
+                            '6': 50
+                        }
+                    },
+                    '2': {
+                        w: 25,
+                        attribs: {
+                            '1': 50,
+                            '2': 50,
+                            '3': 50,
+                            '4': 50,
+                            '5': 50
+                        }
+                    }
+                };
+
+            var rankables = ud.rattribs;
+
+            if (rankables == null)
+                rankables = [
+                    {id:'1', label:'מורה', attribs:[
+                        {id:'1', label:'בקיאות בחומר', desc:'לא מרבה לומר "אני חייב לכם תשובה"'},
+                        {id:'2', label:'אירגון הזמן', desc:'בעל הסבר מסודר, מספיק את כל החומר'},
+                        {id:'3', label:'התיחסות לשאלות'},
+                        {id:'4', label:'כושר הסברה', desc:'הסבר ברור ומעניין'},
+                        {id:'5', label:'העמקה בתאוריה'},
+                        {id:'6', label:'העמקה בתרגול'}
+                    ]},
+                    {id:'2', label:'כיתה', attribs:[
+                        {id:'1', label:'נוחות הכיסאות'},
+                        {id:'2', label:'שקט סביבתי'},
+                        {id:'3', label:'תנאי תאורה'},
+                        {id:'4', label:'תמיכה בערנות'},
+                        {id:'5', label:'מיזוג אוויר'}
+                    ]}
+                ];
+
+
+            var ranks = ud.ranks, dummy = ud.dummy;
+
+            var plan = ud.plan;
+
+            var lists = ud.lists;
+
+            var afixes = ud.fixes;
+
+            var hrepmods = new Hash(), arepmods = ud.repmods;
+            arepmods.each(function(repmod){hrepmods.set(repmod.id, repmod);});
+
+            var fixes = new Hash();
+            afixes.each(function(fix){
+                if (!fixes.has(fix.movie))
+                    fixes.set(fix.movie, []);
+                fixes.get(fix.movie).include(fix);
+                related[fix.movie] = true;
+            });
+
+            // repmods' origins
+            var repmod_cache = ud.repmod_cache;
+
+            // including repmods' origins for selection
+            var selection_cache = ud.selection_cache;
+
+            // add private stuff to cache as is
+            this.cache.extend(arepmods.filter(function(movie){return movie.private;}));
+
+            // add non-private stuff's origins
+            this.cache.extend(repmod_cache.filter(function(movie){
+                return !this.has(movie.id);
+            }, this.hcache));
+
+            this.cache.each(function(movie){
+                if (hrepmods.has(movie.id)){
+                    var repmod = hrepmods.get(movie.id);
+                    if (repmod.private) return;
+                    movie.shows.extend(repmod.shows);
+                }
+            });
+
+            selection_cache.each(function(movie){
+                related[movie.id] = true;
+                if (hrepmods.has(movie.id)){
+                    var repmod = hrepmods.get(movie.id);
+                    if (repmod.private) return;
+                    movie.shows.extend(repmod.shows);
+                }
+            });
+
+
+            var selection = ud.selections;
+
+            var mods_index = ud.repmods.filter(function(repmod){return repmod['private'];}).map(function(repmod) {
+                related[repmod.id] = true;
+                return {sid: repmod.id, title: repmod.title, category: repmod.category, id: repmod.id};
+            });
+
+            this.index.extend(mods_index);
+
+            if (ud.minReadOnly)
+                this.index = this.index.filter(function(item)
+                {
+                    return related[item.id];
+                })
+
+
+            window.index = this.index;
+
+            var friends = ud.friends;
+
+            document.id('restofmain').fade('hide');
+
+            
+
+            setupExams();
+
+            operate(this.cache, selection, selection_cache, this.index, '21', friends, ['2017-07-03 00:00:00', '2017-09-25 00:00:00'], 45, fixes, lists, plan, weights, rankables, ranks, dummy, {pager:ud.ui.pager}, 0, ud.pslist, false);
+            
+
+           
+            
+            if (ud.ch)
+                document.id('changeslink').removeClass('hidden');
+            else
+                document.id('changeslink').addClass('hidden');
+            
+           
+
+            document.id('restofmain').fade.delay(0, document.id('restofmain'), 'in');
+            this.spinner.toggle();
+
+        }
+
+        window.addEvent('domready', function (){
+
+            var weights = {
+                    '1': {
+                        w: 75,
+                        attribs: {
+                            '1': 50,
+                            '2': 50,
+                            '3': 50,
+                            '4': 50,
+                            '5': 50,
+                            '6': 50
+                        }
+                    },
+                    '2': {
+                        w: 25,
+                        attribs: {
+                            '1': 50,
+                            '2': 50,
+                            '3': 50,
+                            '4': 50,
+                            '5': 50
+                        }
+                    }
+                };
+
+            var rankables = [
+                {id:'1', label:'מורה', attribs:[
+                    {id:'1', label:'בקיאות בחומר', desc:'לא מרבה לומר "אני חייב לכם תשובה"'},
+                    {id:'2', label:'אירגון הזמן', desc:'בעל הסבר מסודר, מספיק את כל החומר'},
+                    {id:'3', label:'התיחסות לשאלות'},
+                    {id:'4', label:'כושר הסברה', desc:'הסבר ברור ומעניין'},
+                    {id:'5', label:'העמקה בתאוריה'},
+                    {id:'6', label:'העמקה בתרגול'}
+                ]},
+                {id:'2', label:'כיתה', attribs:[
+                    {id:'1', label:'נוחות הכיסאות'},
+                    {id:'2', label:'שקט סביבתי'},
+                    {id:'3', label:'תנאי תאורה'},
+                    {id:'4', label:'תמיכה בערנות'},
+                    {id:'5', label:'מיזוג אוויר'}
+                ]}
+            ];
+
+
+            var ranks = {}, dummy = [];
+
+            var plan = {'first':-1, 'lsts':[]};
+
+            var lists = [];
+
+            var fixes = new Hash();
+
+            // including repmods' origins for selection
+            var selection_cache = [];
+
+            var cache = [
+            {"category": "הנדסה אזרחית וסביבתית", "title": "סטטיסטיקה", "notes": "קבוצה 91 לתכנית ירושלים בלבד.", "details": {"cr": 3.0, "exams": {"a": "07/07", "b": "25/09"}}, "id": "014003", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ\"מ", "id": "2ed93c6ef7884e6d428fed946570a141", "name": "ב.פישביין"}}, "duration": 120, "where": {"dummy": 1, "id": "9efeaac29bff0778eef6402ed12aab6c"}, "groupping_id": "10", "when": "2009-12-21 12:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "897ddf3915f004ff71f59658ecdcfc10"}}, "duration": 120, "where": {"dummy": 1, "id": "9869198957e210352b773ece7c19c359"}, "groupping_id": "11", "when": "2009-12-22 08:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "bc2ab3dcac1f8eec99c87fb4ae74605d"}}, "duration": 120, "where": {"dummy": 1, "id": "459d2bcf83664602ebe3962f50c88f77"}, "groupping_id": "12", "when": "2009-12-22 12:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "817e8a0cd6486cb844c03a52e8ed4f6f"}}, "duration": 120, "where": {"dummy": 1, "id": "4a201e2e3e6cee84541d7bbb3ba030b9"}, "groupping_id": "13", "when": "2009-12-23 14:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "7866679d23a1bd98c6e26b238af32eb9"}}, "duration": 120, "where": {"dummy": 1, "id": "53b94227491fdb9c55e2a9f525c8841c"}, "groupping_id": "14", "when": "2009-12-22 08:30:00", "id": "14"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "c189925097987f1080b67cad3ec2545b"}}, "duration": 120, "where": {"dummy": 1, "id": "e174cfe3bae124407bc443d7dfd3bce6"}, "groupping_id": "15", "when": "2009-12-20 10:30:00", "id": "15"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "נתוח מערכות", "notes": "", "details": {"cr": 3.0, "exams": {"a": "23/07", "b": "16/10"}}, "id": "014004", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "b6ef61e87bcc04c7ac7593e3ae96ea75", "name": "ר.לינקר"}}, "duration": 120, "where": {"dummy": 1, "id": "d01e93547d8f213a0db80bad2434fd68"}, "groupping_id": "10", "when": "2009-12-20 12:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "b273087beb37dc60db912b8727a1ee2d"}}, "duration": 120, "where": {"dummy": 1, "id": "e96fb7771dd21c809b7aa2cdfd01ce98"}, "groupping_id": "11", "when": "2009-12-21 11:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "b563b0f9b6f81b14e1d20440ae9b94de"}}, "duration": 120, "where": {"dummy": 1, "id": "e62359646e3571f0f7c359ba2627bdd9"}, "groupping_id": "12", "when": "2009-12-20 14:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "486eac169acc22a3fe684a3e28d2e2cd"}}, "duration": 120, "where": {"dummy": 1, "id": "7b3dc65b129a2c5f7270f6ee7e0cc7a4"}, "groupping_id": "13", "when": "2009-12-20 16:30:00", "id": "13"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מעבדה הנדסית", "notes": "", "details": {"cr": 1.5, "exams": {"b": "26/09"}}, "id": "014005", "shows": [{"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "8094aca894f9af2485b811d360af401a"}}, "duration": 180, "where": {"dummy": 1, "id": "d81325b72eb65fd9282105b46e89ca3d"}, "groupping_id": "111", "when": "2009-12-20 12:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "4e526f27b92a906c4715284d5c21a5e6"}}, "duration": 180, "where": {"dummy": 1, "id": "3e97ca98f0d87d9750ffe8b214ac824c"}, "groupping_id": "112", "when": "2009-12-20 12:30:00", "id": "12"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "6c7658ee08e4466c5bc744ebeceed8bd"}}, "duration": 180, "where": {"dummy": 1, "id": "1073d5c570fa26c65cb0777f0df22739"}, "groupping_id": "113", "when": "2009-12-20 12:30:00", "id": "13"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "42d0e1c66028d011bf1c6ebae10f012f"}}, "duration": 180, "where": {"dummy": 1, "id": "831bb445fedb7f9d451fe83c30d98ca9"}, "groupping_id": "114", "when": "2009-12-20 12:30:00", "id": "14"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "0d627849dd91202849ce3895fec8e1be"}}, "duration": 180, "where": {"dummy": 1, "id": "5a35a1bd07160d43f37afd5a408ad026"}, "groupping_id": "115", "when": "2009-12-24 12:30:00", "id": "15"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "6d3f2773a52da609aba2e10b6696a6b7"}}, "duration": 180, "where": {"dummy": 1, "id": "6c6abfda18030e79f88249a134ed5bb4"}, "groupping_id": "116", "when": "2009-12-24 12:30:00", "id": "16"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מבוא לשיטות נומריות", "notes": "קבוצה 91 לתכנית ירושלים בלבד.", "details": {"cr": 3.0, "exams": {"a": "02/08", "b": "23/10"}}, "id": "014006", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ\"מ", "id": "5a1bff8c04e0629a555c345aba7d6b5c", "name": "א.דגני"}}, "duration": 120, "where": {"dummy": 1, "id": "1f3b517b03ed7996f1ab58467061049a"}, "groupping_id": "10", "when": "2009-12-21 10:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "0c64242ef80481818b570a6fd99fc85f"}}, "duration": 120, "where": {"dummy": 1, "id": "f9ea70227e6171a93f7a4aa924edda83"}, "groupping_id": "11", "when": "2009-12-22 12:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "8714dc3188bcd9558d06d22bdcf32eae"}}, "duration": 120, "where": {"dummy": 1, "id": "0e824854355b784e33195510465de88b"}, "groupping_id": "12", "when": "2009-12-22 12:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "7368a562d5f96a32571d702f7d8e850b"}}, "duration": 120, "where": {"dummy": 1, "id": "19133e7030a11e10268f6fb895f3ab5c"}, "groupping_id": "13", "when": "2009-12-22 16:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "b4335bfbf9f7f46dbac078553cf58f78"}}, "duration": 120, "where": {"dummy": 1, "id": "5bc4624f7209af1a4605730e93a9d966"}, "groupping_id": "14", "when": "2009-12-22 16:30:00", "id": "14"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "96340123ca61c79eb1e61b8fa96be235"}}, "duration": 120, "where": {"dummy": 1, "id": "f15d0c337c5b08ea4f6c996c1d08a888"}, "groupping_id": "15", "when": "2009-12-22 14:30:00", "id": "15"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "7fc4e70c31976ad016441799087ceacf"}}, "duration": 120, "where": {"dummy": 1, "id": "bc588d00067094087eb801d770c6e2e5"}, "groupping_id": "16", "when": "2009-12-22 16:30:00", "id": "16"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "f902e76208c4fc4998c8f990e5d98bb7"}}, "duration": 120, "where": {"dummy": 1, "id": "d1964c35cca273cc6ee77e50257fbe15"}, "groupping_id": "17", "when": "2009-12-20 16:30:00", "id": "17"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "65a8eb1054537a01722d629fcacc8621"}}, "duration": 120, "where": {"dummy": 1, "id": "3ca51eeeae6425ee655f40c14fca50c4"}, "groupping_id": "18", "when": "2009-12-20 16:30:00", "id": "18"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "36089228ea9e429675759abe0b223b37"}}, "duration": 120, "where": {"dummy": 1, "id": "7f3c0ef0870b4d1e298ff02e235e5e95"}, "groupping_id": "19", "when": "2009-12-21 16:30:00", "id": "19"}, {"parent_id": "20", "kind": "הרצאה", "details": {"who": {"title": "פרופ\"מ", "id": "5a1bff8c04e0629a555c345aba7d6b5c", "name": "א.דגני"}}, "duration": 120, "where": {"dummy": 1, "id": "674cd7c29e77a01a76ed236fdc2fdd66"}, "groupping_id": "20", "when": "2009-12-21 10:30:00", "id": "20"}, {"parent_id": "20", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "01c311b88cf20cbbcb550d7f90c12a39"}}, "duration": 120, "where": {"dummy": 1, "id": "34f4ea88af6763f403877e124679b60d"}, "groupping_id": "21", "when": "2009-12-21 16:30:00", "id": "21"}, {"parent_id": "20", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "feb81a90819109bd22f9c9cfcd466374"}}, "duration": 120, "where": {"dummy": 1, "id": "bacd4fd33bc435e2f378f2cec0e98fa0"}, "groupping_id": "22", "when": "2009-12-24 14:30:00", "id": "22"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מידע גרפי הנדסי", "notes": "", "details": {"cr": 3.0, "exams": {"a": "21/07", "b": "26/09"}}, "id": "014008", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "09cf9d3adef40ac9a48eb092993527bf", "name": "ר.זקס"}}, "duration": 120, "where": {"dummy": 1, "id": "2c54b6b036671281325d92dcc834d0d9"}, "groupping_id": "10", "when": "2009-12-24 08:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "6146801d6ed6a81bbd6f10784d77b3db"}}, "duration": 120, "where": {"dummy": 1, "id": "36c12fb47d5bcb6b67f43a766774a0dc"}, "groupping_id": "11", "when": "2009-12-20 10:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "d32c4b9b22b08319808b824a26c53b2c"}}, "duration": 120, "where": {"dummy": 1, "id": "061fccc4e2c14753b82485a4ea1d3f94"}, "groupping_id": "12", "when": "2009-12-20 10:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "984e8c876dfe647f33d92108650e73fd"}}, "duration": 120, "where": {"dummy": 1, "id": "bc7f12e0fcd70394dba17dd44521e4f0"}, "groupping_id": "13", "when": "2009-12-24 12:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "44adadc65a00b680c80e6dea78d00732"}}, "duration": 120, "where": {"dummy": 1, "id": "e0c5fa8078799e6ffa2ed4f4150bd8dc"}, "groupping_id": "14", "when": "2009-12-24 12:30:00", "id": "14"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "a2cec98c36c91fab1035e63f08d4a3c4"}}, "duration": 120, "where": {"dummy": 1, "id": "cc6d524f94dee993ff9bd320e31625ea"}, "groupping_id": "15", "when": "2009-12-24 16:30:00", "id": "15"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "תורת החוזק 1", "notes": "קבוצה 91 לתכנית ירושלים בלבד.", "details": {"cr": 4.0, "exams": {"a": "31/07", "b": "16/10"}}, "id": "014104", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ.", "id": "feb9b532abb7683f38a44f3dcb22d39a", "name": "מ.איזנברגר"}}, "duration": 180, "where": {"dummy": 1, "id": "8bb3001de9e4b8e2e4ea4bae63b552c0"}, "groupping_id": "10", "when": "2009-12-22 08:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "e3398ead0333f4b0c42da41dd0ff8494"}}, "duration": 120, "where": {"dummy": 1, "id": "9ba9ef89636d56d742f07c0bc60dbf62"}, "groupping_id": "11", "when": "2009-12-24 14:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "104db90188a19181fb726f92788e2036"}}, "duration": 120, "where": {"dummy": 1, "id": "c61cfe9572a2f37e4a1bfb441d740769"}, "groupping_id": "12", "when": "2009-12-24 14:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "d2d99c405a7ea7758367c98cf8f95b95"}}, "duration": 120, "where": {"dummy": 1, "id": "38b1805b7ab1aae1cf7466b847185e93"}, "groupping_id": "13", "when": "2009-12-20 16:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "b21e08024988459ec7a95cd90698299c"}}, "duration": 120, "where": {"dummy": 1, "id": "5c9bdeea6f39b24243047ec59bafe6bf"}, "groupping_id": "14", "when": "2009-12-20 16:30:00", "id": "14"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "f4e7e65facd73952aa5847c899a036aa"}}, "duration": 120, "where": {"dummy": 1, "id": "04672fbd0e100aa97910817454dc5228"}, "groupping_id": "15", "when": "2009-12-21 16:30:00", "id": "15"}, {"parent_id": "90", "kind": "הרצאה", "details": {"who": {"title": "פרופ.", "id": "feb9b532abb7683f38a44f3dcb22d39a", "name": "מ.איזנברגר"}}, "duration": 180, "where": {"dummy": 1, "id": "79ed6ed15bf3fc4515010d693828b8c9"}, "groupping_id": "90", "when": "2009-12-22 08:30:00", "id": "90"}, {"parent_id": "90", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "4af258d536c0db2d1fc9def4cc6e7064"}}, "duration": 120, "where": {"dummy": 1, "id": "6ed43023260ef404fa36e51adbbeac4f"}, "groupping_id": "91", "when": "2009-12-22 16:30:00", "id": "91"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מבני בטון 1", "notes": "קבוצה 91 לתכנית ירושלים בלבד.", "details": {"cr": 3.5, "exams": {"a": "12/07", "b": "28/09"}}, "id": "014123", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "7e8ae707c38956fba1599783581c4168", "name": "א.דנציגר"}}, "duration": 120, "where": {"dummy": 1, "id": "c6d5d64b301f959a6aee4db7cab7f1c2"}, "groupping_id": "10", "when": "2009-12-24 10:30:00", "id": "10"}, {"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "7e8ae707c38956fba1599783581c4168", "name": "א.דנציגר"}}, "duration": 60, "where": {"dummy": 1, "id": "06504639de4fc897da31dd55bbee4161"}, "groupping_id": "10", "when": "2009-12-24 13:30:00", "id": "10"}, {"parent_id": "10", "kind": "קבוצה", "details": {"who": {"dummy": 1, "id": "6b0caefc943b47ffc828c1f25e6bc4f5"}}, "duration": 120, "where": {"dummy": 1, "id": "42ad9a585db35976d80d704d89fc169f"}, "groupping_id": "11", "when": "2009-12-20 12:30:00", "id": "11"}, {"parent_id": "10", "kind": "קבוצה", "details": {"who": {"dummy": 1, "id": "77994423142ee17cfebc0f6b2f924855"}}, "duration": 120, "where": {"dummy": 1, "id": "47b4a37e3531daa3bb971c7d0721ebf7"}, "groupping_id": "12", "when": "2009-12-20 12:30:00", "id": "12"}, {"parent_id": "10", "kind": "קבוצה", "details": {"who": {"dummy": 1, "id": "8524ff1634ca23fdd3ca21778510d830"}}, "duration": 120, "where": {"dummy": 1, "id": "633241e6880f4368b98dbe5c3a15e58a"}, "groupping_id": "13", "when": "2009-12-20 16:30:00", "id": "13"}, {"parent_id": "10", "kind": "קבוצה", "details": {"who": {"dummy": 1, "id": "c60ae3f0a4d78f8c74b455ddee8790df"}}, "duration": 120, "where": {"dummy": 1, "id": "f7c4aba90d66d17d702a7f61f81bbe06"}, "groupping_id": "14", "when": "2009-12-23 16:30:00", "id": "14"}, {"parent_id": "10", "kind": "קבוצה", "details": {"who": {"dummy": 1, "id": "c660808ec392879dbcd07f75d4450beb"}}, "duration": 120, "where": {"dummy": 1, "id": "ae01bb09658058ba8941c48955d82244"}, "groupping_id": "15", "when": "2009-12-23 16:30:00", "id": "15"}, {"parent_id": "10", "kind": "קבוצה", "details": {"who": {"dummy": 1, "id": "1dc0b7a7df385eb67f3365dcd6160f7e"}}, "duration": 120, "where": {"dummy": 1, "id": "7be709b1776eb3b44cde71528a3d3688"}, "groupping_id": "16", "when": "2009-12-23 08:30:00", "id": "16"}, {"parent_id": "10", "kind": "קבוצה", "details": {"who": {"dummy": 1, "id": "3decafa9676db8fd3d54b5548f0b632a"}}, "duration": 120, "where": {"dummy": 1, "id": "1a929370d7445962ea25aa1ede0bb551"}, "groupping_id": "17", "when": "2009-12-23 08:30:00", "id": "17"}, {"parent_id": "90", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "7e8ae707c38956fba1599783581c4168", "name": "א.דנציגר"}}, "duration": 120, "where": {"dummy": 1, "id": "43d4376eb379170b1571bee7baecc452"}, "groupping_id": "90", "when": "2009-12-24 10:30:00", "id": "90"}, {"parent_id": "90", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "7e8ae707c38956fba1599783581c4168", "name": "א.דנציגר"}}, "duration": 60, "where": {"dummy": 1, "id": "51dca25cd481b9921a506647d86c6f92"}, "groupping_id": "90", "when": "2009-12-24 13:30:00", "id": "90"}, {"parent_id": "90", "kind": "קבוצה", "details": {"who": {"dummy": 1, "id": "6fdf54aea979d9bafc087982300ddf1a"}}, "duration": 120, "where": {"dummy": 1, "id": "73350e098cf7013141131151c3b7ef67"}, "groupping_id": "91", "when": "2009-12-23 08:30:00", "id": "91"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מבוא לדינמיקת מבנים ורעידות אדמה", "notes": "הרישום הינו רק לקבוצות המעבדה._MY_קבוצה 24 מיועדת לסטודנטים החוזרים על הקורס בלבד, ופטורים ממעבדה._MY_סטודנטים שנרשמים בפעם הראשונה לקורס וירשמו לקבוצה 24 מקומם בקורס לא יובטח, במידה וכל קבוצות המעבדה מלאות יש להודיע למזכירות ולא להירשם לקבוצה .24", "details": {"cr": 4.5, "exams": {"a": "17/07", "b": "18/10"}}, "id": "014146", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ\"מ", "id": "64525ec2591ce6b14448d9a1d4826530", "name": "י.גולדפלד"}}, "duration": 180, "where": {"dummy": 1, "id": "d6a9badcb204d204deb86719d855395a"}, "groupping_id": "10", "when": "2009-12-22 08:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "1b8e161601513637bf65e8bcaef6a68d"}}, "duration": 120, "where": {"dummy": 1, "id": "f070239744d031f37a36c2b32ffafc75"}, "groupping_id": "11", "when": "2009-12-22 15:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "9dfbcefb5b1103830622ba39e6cda11b"}}, "duration": 120, "where": {"dummy": 1, "id": "23f8d8b5f260f3da6e65bc3f8bca3201"}, "groupping_id": "111", "when": "2009-12-20 10:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "2eaef25ae5a7127519f43dbab863955f"}}, "duration": 120, "where": {"dummy": 1, "id": "8d54561b27a6f1c0cb7072e367864c85"}, "groupping_id": "112", "when": "2009-12-20 10:30:00", "id": "12"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "03175952f3b56134fdb0403aad150213"}}, "duration": 120, "where": {"dummy": 1, "id": "5e7930e0ba286883cc515b13f779b9a6"}, "groupping_id": "113", "when": "2009-12-20 12:30:00", "id": "13"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "a67721083d3d1ced7d3dfe38cf0639d1"}}, "duration": 120, "where": {"dummy": 1, "id": "31fe1fe94fb216231d64085746bfa24d"}, "groupping_id": "114", "when": "2009-12-20 12:30:00", "id": "14"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "9da2eadbe0a5eaf30372140d5f001dd0"}}, "duration": 120, "where": {"dummy": 1, "id": "fedb4cabc719836b071550e2f1bd3950"}, "groupping_id": "115", "when": "2009-12-21 08:30:00", "id": "15"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "b016aa3af47aa57b53fa30c002f24a25"}}, "duration": 120, "where": {"dummy": 1, "id": "8940fcdbe424673cf9205c609ce2ff25"}, "groupping_id": "116", "when": "2009-12-21 08:30:00", "id": "16"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "7956b82314c02be66cbff23d4e6de027"}}, "duration": 120, "where": {"dummy": 1, "id": "170cdaf8cd70dd68e2b0918397df5c9f"}, "groupping_id": "117", "when": "2009-12-21 10:30:00", "id": "17"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "7c3d6b51ab168630013c44b386df4a51"}}, "duration": 120, "where": {"dummy": 1, "id": "6abb8d7c536568b85b7ca19bdf481079"}, "groupping_id": "118", "when": "2009-12-21 10:30:00", "id": "18"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "7782ab1f90c9981b6289dd44fdb86f6f"}}, "duration": 120, "where": {"dummy": 1, "id": "de77dfecb3aa76068de624a91ecc67bd"}, "groupping_id": "119", "when": "2009-12-21 12:30:00", "id": "19"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "6d3d004676e4d4193aee5750f49bb8d7"}}, "duration": 120, "where": {"dummy": 1, "id": "2a6fd4f385fa9efb312b663f1118f930"}, "groupping_id": "12", "when": "2009-12-23 08:30:00", "id": "12"}, {"parent_id": "20", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "2b5cbf133165e55662e8ad441e640a5a"}}, "duration": 120, "where": {"dummy": 1, "id": "1347bcde7fa73c972d20f2b7affab39c"}, "groupping_id": "121", "when": "2009-12-21 12:30:00", "id": "21"}, {"parent_id": "20", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "e62023a5e9eb03c764ae7b32b5474398"}}, "duration": 120, "where": {"dummy": 1, "id": "7b55133defef16677950db1e7de62318"}, "groupping_id": "122", "when": "2009-12-23 12:30:00", "id": "22"}, {"parent_id": "20", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "cc2dcd260d677bf4ce47607c7e72adff"}}, "duration": 120, "where": {"dummy": 1, "id": "d76e1f1b0b4772f195762beea0e95058"}, "groupping_id": "123", "when": "2009-12-23 12:30:00", "id": "23"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "974ee805ee42ab309645b7e2bea68d64"}}, "duration": 120, "where": {"dummy": 1, "id": "b0364ca51ac4fcd7750484a1cfe0dc9a"}, "groupping_id": "13", "when": "2009-12-24 08:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "25d64c07cb2fc343c0d395e758e576d7"}}, "duration": 120, "where": {"dummy": 1, "id": "13712b36d95cc90941c3ce46b99ccc31"}, "groupping_id": "14", "when": "2009-12-24 08:30:00", "id": "14"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "עקרי תכן מבנים", "notes": "", "details": {"cr": 3.0, "exams": {"a": "20/07", "b": "25/09"}}, "id": "014148", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "אינג.", "id": "ecc17f2b12131a51632f87b11047975a", "name": "ג.טרכטנברג"}}, "duration": 60, "where": {"dummy": 1, "id": "85067a4cd137c5ccc533da4ec67f8ec1"}, "groupping_id": "10", "when": "2009-12-21 14:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "1036e98b1202912b283c6260879756e2"}}, "duration": 180, "where": {"dummy": 1, "id": "285f8f62dd49ad05bb855da3e250e8ca"}, "groupping_id": "11", "when": "2009-12-21 15:30:00", "id": "11"}, {"parent_id": "20", "kind": "הרצאה", "details": {"who": {"title": "אינג.", "id": "65b625c464ca80527ce7348e7ce26a50", "name": "ר.משען"}}, "duration": 60, "where": {"dummy": 1, "id": "8cac3be829827cf99103c2d1173f276a"}, "groupping_id": "20", "when": "2009-12-23 14:30:00", "id": "20"}, {"parent_id": "20", "kind": "תרגיל", "details": {"who": {"title": "אינג.", "id": "ecc17f2b12131a51632f87b11047975a", "name": "ג.טרכטנברג"}}, "duration": 180, "where": {"dummy": 1, "id": "0189bd2fa0048088c4484d316aaf635f"}, "groupping_id": "21", "when": "2009-12-23 15:30:00", "id": "21"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מבני פלדה 1", "notes": "", "details": {"cr": 4.5, "exams": {"a": "31/07", "b": "22/10"}}, "id": "014150", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "e43c69f4d42ded3bd53550f77d86d6fd", "name": "א.לבן"}}, "duration": 180, "where": {"dummy": 1, "id": "601ce285ff33837f0d87e43ba90ca881"}, "groupping_id": "10", "when": "2009-12-22 11:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "8c549b2443819f69351befbeddcf367a"}}, "duration": 120, "where": {"dummy": 1, "id": "1960163bfd6b94b2b82d9dc11370e624"}, "groupping_id": "11", "when": "2009-12-21 10:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "6e059e041ed31def399dc0c90f73aeed"}}, "duration": 120, "where": {"dummy": 1, "id": "72c7ed7846d4eb7745450ec0e3d4ceca"}, "groupping_id": "12", "when": "2009-12-21 10:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "16fd424efdab2990f81a31c0b914f305"}}, "duration": 120, "where": {"dummy": 1, "id": "8e0347de7826b398cc14980c5f6c42fb"}, "groupping_id": "13", "when": "2009-12-20 16:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "944bdfd47b82a655c147477ad399af08"}}, "duration": 120, "where": {"dummy": 1, "id": "cbc0e135eae47eced8aee61541e50a2c"}, "groupping_id": "14", "when": "2009-12-22 15:30:00", "id": "14"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מבוא להידרוליקה והידרולוגיה", "notes": "", "details": {"cr": 3.5, "exams": {"a": "24/07", "b": "15/10"}}, "id": "014213", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ.", "id": "c803e043b7104d7ec5656dc4c70a4371", "name": "א.אוסטפלד"}}, "duration": 120, "where": {"dummy": 1, "id": "f6c8aca21d52671dd73672e47c61ef45"}, "groupping_id": "10", "when": "2009-12-20 14:30:00", "id": "10"}, {"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ.", "id": "c803e043b7104d7ec5656dc4c70a4371", "name": "א.אוסטפלד"}}, "duration": 60, "where": {"dummy": 1, "id": "21b51cffd832d75fef7d48b2314edf13"}, "groupping_id": "10", "when": "2009-12-22 14:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "fd8b7bc9e1e13b754a2e6b8f0ab9929e"}}, "duration": 60, "where": {"dummy": 1, "id": "2089e0b18872a37bf2f18de8acbaaef1"}, "groupping_id": "11", "when": "2009-12-23 11:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "5e50be92a9f6ac1e67399a37f235870b"}}, "duration": 60, "where": {"dummy": 1, "id": "0e810af00f43da0a91847d3def425446"}, "groupping_id": "12", "when": "2009-12-23 11:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "4aa002a15ca424164d884d62ab66d37e"}}, "duration": 60, "where": {"dummy": 1, "id": "04d10c6de35d14e369e046e143a048f2"}, "groupping_id": "13", "when": "2009-12-21 08:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "23a993d6e3859d73710b60a5306a8c2a"}}, "duration": 60, "where": {"dummy": 1, "id": "168fd346773690fa83568a4d896b0120"}, "groupping_id": "14", "when": "2009-12-21 08:30:00", "id": "14"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "0f897e5a5c9041bc3ebcdcea7a92e686"}}, "duration": 60, "where": {"dummy": 1, "id": "22dc916d2bdcbd5813631ea2764353d8"}, "groupping_id": "15", "when": "2009-12-24 15:30:00", "id": "15"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "סמינריון בהנ. סביבתית ומשאבי מים", "notes": "", "details": {"cr": 1.5, "exams": {}}, "id": "014300", "shows": [{"parent_id": "10", "kind": "תרגיל", "details": {"who": {"id": "f782a665c268392d59650555d0727d85", "name": "ג.רמון", "title": "פרופ\"מ"}}, "duration": 120, "where": {"dummy": 1, "id": "7121cc5a1c2154d774d76060166cc8a7"}, "groupping_id": "11", "when": "2009-12-20 09:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "פרויקט בהנדסה סביבתית", "notes": "", "details": {"cr": 2.5, "exams": {}}, "id": "014301", "shows": [{"parent_id": "10", "kind": "קבוצה", "details": {"who": {"id": "5371e46438900522b74bd915fd153a83", "name": "צ.גרטלר", "title": "ד\"ר"}}, "duration": 120, "where": {"dummy": 1, "id": "6573765a1f752617282d0361492cf41b"}, "groupping_id": "11", "when": "2009-12-24 16:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "טכנולוגיות מים ושפכים", "notes": "", "details": {"cr": 2.5, "exams": {"a": "18/07", "b": "16/10"}}, "id": "014309", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "750698889f0c93a172a6d4bac89f8c72", "name": "י.גנדל"}}, "duration": 120, "where": {"dummy": 1, "id": "392f4246d8efc7db8c049d7aabc36bf2"}, "groupping_id": "10", "when": "2009-12-20 16:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "4d21fcb5acf611755e82bce7b5baae22"}}, "duration": 60, "where": {"dummy": 1, "id": "613a67685b3b38b9739ebc44d5da06f5"}, "groupping_id": "11", "when": "2009-12-20 18:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מבוא להנדסת הסביבה", "notes": "", "details": {"cr": 2.5, "exams": {"a": "06/07", "b": "02/10"}}, "id": "014316", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ\"מ", "id": "76aacef4596526e6d6b96891880d3867", "name": "ג.רמון"}}, "duration": 120, "where": {"dummy": 1, "id": "045610fba5bec4b6ea38d70595f034ff"}, "groupping_id": "10", "when": "2009-12-20 09:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "9d59618374baf124ffd73008e47d0211"}}, "duration": 60, "where": {"dummy": 1, "id": "21d198bd915b2ecbc70c40e07f5a96e7"}, "groupping_id": "11", "when": "2009-12-20 11:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "f4fcc14a0c5bc173cb9d6045a6f04083"}}, "duration": 60, "where": {"dummy": 1, "id": "22ef187c37357e3c95c0907f12dcd2b0"}, "groupping_id": "12", "when": "2009-12-22 15:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "0f85878b0cd2ae4fda3cb083b5374d6e"}}, "duration": 60, "where": {"dummy": 1, "id": "b1973ba782557e37070b49eef00606b7"}, "groupping_id": "13", "when": "2009-12-20 11:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "f35949d264451885dd30a946408848f0"}}, "duration": 60, "where": {"dummy": 1, "id": "1c2efc6d8a7e3b1d49b074f67a23f19d"}, "groupping_id": "14", "when": "2009-12-24 16:30:00", "id": "14"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "3f37424006d686d3c211a7729b717e99"}}, "duration": 60, "where": {"dummy": 1, "id": "9022259ce578bae246584ce9dcb1b3c5"}, "groupping_id": "15", "when": "2009-12-22 15:30:00", "id": "15"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "תכן מערכות אספקת מים ואיסוף שפכים", "notes": "", "details": {"cr": 3.5, "exams": {}}, "id": "014325", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"id": "9e6a07e51bf950275601128de77e64ba", "name": "ע.פרידלר", "title": "פרופ/ח"}}, "duration": 180, "where": {"dummy": 1, "id": "d1146215c9d4c4fff3ed56c665c0c5ed"}, "groupping_id": "10", "when": "2009-12-21 14:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "d47aed74c4bad4ea60418ee7648f5c24"}}, "duration": 60, "where": {"dummy": 1, "id": "0c14a2383368eea1a4f945d8b25f9b20"}, "groupping_id": "11", "when": "2009-12-21 17:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "bc3f3b9b63b0cfd6f5be935e620b2831"}}, "duration": 60, "where": {"dummy": 1, "id": "413859cdad05abcfcd0fe5b403336609"}, "groupping_id": "12", "when": "2009-12-21 17:30:00", "id": "12"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "טכנולוגיות טיפול בפסולת מוצקת", "notes": "", "details": {"cr": 2.5, "exams": {"a": "20/07", "b": "03/10"}}, "id": "014326", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ.", "id": "b369f81807761fc41ac6599ae6fcbb82", "name": "ק.דוזורץ"}}, "duration": 120, "where": {"dummy": 1, "id": "27c18210bb370495490a0795b49c3482"}, "groupping_id": "10", "when": "2009-12-23 10:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "b5c8288a7a645c4490cc7474b70a1786"}}, "duration": 120, "where": {"dummy": 1, "id": "62451509818cf682fcb30cf31cb3ae70"}, "groupping_id": "11", "when": "2009-12-23 08:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "16235f8b1c0e3ed33cf52b45ac214489"}}, "duration": 120, "where": {"dummy": 1, "id": "4f3f0223ce9b1ee072959022cad1b7c6"}, "groupping_id": "12", "when": "2009-12-22 14:30:00", "id": "12"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "כימיה של המים", "notes": "", "details": {"cr": 3.5, "exams": {"a": "12/07", "b": "28/09"}}, "id": "014327", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ.", "id": "b0c805747f702b64f7e83e2d20888c76", "name": "א.להב"}}, "duration": 120, "where": {"dummy": 1, "id": "b1dc1d124207522fc71885b948d338bb"}, "groupping_id": "10", "when": "2009-12-23 08:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "517809f38011397731933a2f273ba1ab"}}, "duration": 60, "where": {"dummy": 1, "id": "852c03ccddbc76cbc5c24094643d90f6"}, "groupping_id": "11", "when": "2009-12-23 10:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "d7aae7e63c46d7fce3ed873ec25ca177"}}, "duration": 180, "where": {"dummy": 1, "id": "4a40fc35b5a22dabbf28ca7a991c0263"}, "groupping_id": "111", "when": "2009-12-23 11:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "f9140a7edc2f2b2d9e889a1b0393eb8d"}}, "duration": 180, "where": {"dummy": 1, "id": "45549aee653eee360bbce60cc360b9c2"}, "groupping_id": "112", "when": "2009-12-20 12:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "c30961f05079645699c3cc0d40a6db2c"}}, "duration": 60, "where": {"dummy": 1, "id": "f48c532da562451799beba4792473b82"}, "groupping_id": "12", "when": "2009-12-23 10:30:00", "id": "12"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "גיאולוגיה הנדסית", "notes": "קבוצות ,91 ,92 93 לתכנית ירושלים", "details": {"cr": 2.0, "exams": {"a": "16/07", "b": "17/10"}}, "id": "014405", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "591a8650f0ffff9d093648872d555bee", "name": "מ.טלסניק"}}, "duration": 120, "where": {"dummy": 1, "id": "48f20eb1eafe4ec57d436a4528522afe"}, "groupping_id": "10", "when": "2009-12-24 08:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "2c57d33079b522a64e278b1d9ed8167c"}}, "duration": 60, "where": {"dummy": 1, "id": "09efb181b5a1e4056196b05d5030ed57"}, "groupping_id": "11", "when": "2009-12-20 14:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "317cf2ec3264f58db841112e12bf3ef1"}}, "duration": 60, "where": {"dummy": 1, "id": "f3bcd945fe584a6a48abcd0f892353f2"}, "groupping_id": "12", "when": "2009-12-20 15:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "e923536ac622e4741da22483e28be01d"}}, "duration": 60, "where": {"dummy": 1, "id": "b2ce5513f7029dd5a7aa248fa035f7b4"}, "groupping_id": "13", "when": "2009-12-20 16:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "26b0303c5ef1839682532d187dc3879b"}}, "duration": 60, "where": {"dummy": 1, "id": "f8adb1e40b386c233b8b58bad430b7d0"}, "groupping_id": "14", "when": "2009-12-20 17:30:00", "id": "14"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "d966305a7fd3abfce231e9020feea40c"}}, "duration": 60, "where": {"dummy": 1, "id": "c2e22b903d31b655d23c95983bb6b461"}, "groupping_id": "15", "when": "2009-12-20 18:30:00", "id": "15"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "4c60c6502f0eb0ff67034f7e6c653541"}}, "duration": 60, "where": {"dummy": 1, "id": "4a52e70b4d2b548ae3b79813ad20e60e"}, "groupping_id": "16", "when": "2009-12-21 16:30:00", "id": "16"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "e6f908564e9decc6d4ea9c6c9006eddb"}}, "duration": 60, "where": {"dummy": 1, "id": "84fc86cc47b96219e4fc4d892533db2d"}, "groupping_id": "17", "when": "2009-12-21 17:30:00", "id": "17"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "d99dd53a8fc0981083ed67d36a387c2a"}}, "duration": 60, "where": {"dummy": 1, "id": "17e64478813a28d180e739828a401e25"}, "groupping_id": "18", "when": "2009-12-21 18:30:00", "id": "18"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "211de8c02e7a0f95d2c5204d651586af"}}, "duration": 60, "where": {"dummy": 1, "id": "c75a25f5eb8aae088827b8ac072a3b66"}, "groupping_id": "19", "when": "2009-12-23 14:30:00", "id": "19"}, {"parent_id": "20", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "cd366fa8872ba261a3e96b3eb0d68c95"}}, "duration": 60, "where": {"dummy": 1, "id": "8d2f927ada12eb2d0f39f79b399eec76"}, "groupping_id": "21", "when": "2009-12-23 15:30:00", "id": "21"}, {"parent_id": "20", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "40e82295cb57d88056c547309a7fd253"}}, "duration": 60, "where": {"dummy": 1, "id": "d23591412ac0663b7efb2b7716e377ca"}, "groupping_id": "22", "when": "2009-12-22 08:30:00", "id": "22"}, {"parent_id": "20", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "44e6834d92f672d79a649cebbfa06804"}}, "duration": 60, "where": {"dummy": 1, "id": "20699bb999bfd24ff2b2d7d0098d76b9"}, "groupping_id": "23", "when": "2009-12-22 09:30:00", "id": "23"}, {"parent_id": "20", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "d076e04a4d32f87239ab25cd1dfca615"}}, "duration": 60, "where": {"dummy": 1, "id": "981d933370a9ceaf498617e514d07e2d"}, "groupping_id": "24", "when": "2009-12-23 16:30:00", "id": "24"}, {"parent_id": "20", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "db5af9ae808537a01d6734e97979b3a3"}}, "duration": 60, "where": {"dummy": 1, "id": "78a3359bd29a3609c8c899ebddd42a3f"}, "groupping_id": "25", "when": "2009-12-23 18:30:00", "id": "25"}, {"parent_id": "20", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "fdab63e0d16304b1be1c3f9712953ac8"}}, "duration": 60, "where": {"dummy": 1, "id": "0b2d46577de75410f07b59dc284b3ff9"}, "groupping_id": "26", "when": "2009-12-24 12:30:00", "id": "26"}, {"parent_id": "90", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "591a8650f0ffff9d093648872d555bee", "name": "מ.טלסניק"}}, "duration": 120, "where": {"dummy": 1, "id": "e32c9f28196adccc29fd83a8353b2a77"}, "groupping_id": "90", "when": "2009-12-24 08:30:00", "id": "90"}, {"parent_id": "90", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "433da57aa8215897b9a0ab1b26ddc01f"}}, "duration": 60, "where": {"dummy": 1, "id": "02beb8d1751848cea93501309c7da0b7"}, "groupping_id": "91", "when": "2009-12-23 16:30:00", "id": "91"}, {"parent_id": "90", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "c9ba6649f99403566abf75d8d8a4445c"}}, "duration": 60, "where": {"dummy": 1, "id": "f5d7a7a5efd9a5fa78bb2a8e68ddee47"}, "groupping_id": "92", "when": "2009-12-23 18:30:00", "id": "92"}, {"parent_id": "90", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "258631b9f14b47d6252068038fcad2b7"}}, "duration": 60, "where": {"dummy": 1, "id": "af4f5b4e63019933e12a0a6e5f10f433"}, "groupping_id": "93", "when": "2009-12-24 12:30:00", "id": "93"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "הנדסת קרקע", "notes": "", "details": {"cr": 3.5, "exams": {"a": "27/07", "b": "28/09"}}, "id": "014411", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"id": "e965561c33dd62739beacdf8f6a89bce", "name": "א.קלר", "title": "פרופ/ח"}}, "duration": 180, "where": {"dummy": 1, "id": "0f6120849230b4840ee834e6727fca0d"}, "groupping_id": "10", "when": "2009-12-24 11:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "a96864d43b76b96314e753106a2d71e8"}}, "duration": 60, "where": {"dummy": 1, "id": "8f28961925c506c1d0cec178c1a130c9"}, "groupping_id": "11", "when": "2009-12-22 16:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "1c9ef5bc3bc4e36d08ada495cebd148a"}}, "duration": 60, "where": {"dummy": 1, "id": "06d0f3bf50e72143f2f52d12b25c7ef0"}, "groupping_id": "12", "when": "2009-12-22 16:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "eac1e3dfaaa1823d0591266668f97fc3"}}, "duration": 60, "where": {"dummy": 1, "id": "e2ca2726391a0f607aa4e97b21d68333"}, "groupping_id": "13", "when": "2009-12-20 13:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "1543949ebc3dac6f3a877d8f9ec37eb6"}}, "duration": 60, "where": {"dummy": 1, "id": "ab18b27f7adf771162ee3b0dce1cfea0"}, "groupping_id": "14", "when": "2009-12-24 14:30:00", "id": "14"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"id": "e965561c33dd62739beacdf8f6a89bce", "name": "א.קלר", "title": "פרופ/ח"}}, "duration": 60, "where": {"dummy": 1, "id": "6c25297447ea15ab6d92d69a6c6bd6f1"}, "groupping_id": "15", "when": "2009-12-23 10:30:00", "id": "15"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "e42b7b9a96ed97d9e17a83d6effc0c77"}}, "duration": 60, "where": {"dummy": 1, "id": "6195e43dab977364dd2f46c299c5eb80"}, "groupping_id": "16", "when": "2009-12-24 14:30:00", "id": "16"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "פרויקט בחומרים ותפקוד", "notes": "רישום ידני אצל שרית בבניין רבין קומה .8", "details": {"cr": 2.5, "exams": {}}, "id": "014501", "shows": [{"parent_id": "10", "kind": "תרגיל", "details": {"who": {"title": "ד\"ר", "id": "d724259b0d5b3731421a6af7f7fa4d48", "name": "י.סיקולר"}}, "duration": 120, "where": {"dummy": 1, "id": "e4e36e0ba32b9c48fc114a7414be28dd"}, "groupping_id": "11", "when": "2009-12-21 18:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "פרויקט מעבדתי בחומרי בניה (1)", "notes": "", "details": {"exams": {}}, "id": "014503", "shows": [{"parent_id": "10", "kind": "תרגיל", "details": {"who": {"title": "פרופ/ח", "id": "4c80c21208896718810a68570c382de4", "name": "ק.קובלר"}}, "duration": 120, "where": {"dummy": 1, "id": "77f4e4d537c6a88ca6e8fb12825f7fb3"}, "groupping_id": "11", "when": "2009-12-22 08:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "טכנולוגיה מתקדמת של בטון", "notes": "רישום ידני בלבד אצל שרית בניין רבין קומה .8", "details": {"cr": 2.0, "exams": {}}, "id": "014506", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "64d7cfbc490670813d75d9b85bfbb0bf", "name": "א.כץ"}}, "duration": 60, "where": {"dummy": 1, "id": "c0477663813458096e23fedd06984f99"}, "groupping_id": "10", "when": "2009-12-21 08:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"title": "פרופ/ח", "id": "64d7cfbc490670813d75d9b85bfbb0bf", "name": "א.כץ"}}, "duration": 60, "where": {"dummy": 1, "id": "85774b5231fcedc8d8c6193f4595d3a0"}, "groupping_id": "11", "when": "2009-12-21 09:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "4601e9b6de1befb56b571601d3b8270f"}}, "duration": 60, "where": {"dummy": 1, "id": "92425761bb258bb886386f63b102b94c"}, "groupping_id": "111", "when": "2009-12-21 10:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "תפקוד פיסי של בנינים", "notes": "", "details": {"cr": 2.5, "exams": {"a": "31/07", "b": "20/10"}}, "id": "014508", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"id": "4d5b261e4ec7da119d4943194a063545", "name": "ס.ז'וטובסקי", "title": "ד\"ר"}}, "duration": 120, "where": {"dummy": 1, "id": "52bb5c378dfa155329ff961fe365e2d6"}, "groupping_id": "10", "when": "2009-12-20 09:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "a1ad18317f33c1c9dd1199c5b68aaaad"}}, "duration": 60, "where": {"dummy": 1, "id": "385e31249f5f2dba03bd19ecd870c306"}, "groupping_id": "11", "when": "2009-12-20 11:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "c93293b6b90406a76d0ebb44a7c0bcf7"}}, "duration": 60, "where": {"dummy": 1, "id": "a4876694af8fa1a8012a66eab3371e68"}, "groupping_id": "12", "when": "2009-12-20 15:30:00", "id": "12"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "חומרים 1", "notes": "", "details": {"cr": 2.5, "exams": {"a": "27/07", "b": "15/10"}}, "id": "014518", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"id": "26d590f49b28bd28600455b660b23c5f", "name": "ג.אגרנטי", "title": "ד\"ר"}}, "duration": 120, "where": {"dummy": 1, "id": "970ed6dcfcc81514a8237b5c85952b19"}, "groupping_id": "10", "when": "2009-12-22 08:30:00", "id": "10"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "e827a211b65e0464827cf6b808f6ee26"}}, "duration": 120, "where": {"dummy": 1, "id": "cc0bdcc3275c5d223b4b7ff235466aa7"}, "groupping_id": "111", "when": "2009-12-21 12:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "4d6d07ce128c370f950ca464306eb8e6"}}, "duration": 120, "where": {"dummy": 1, "id": "b5fb7bd892785a5d2842c5b727ba7a60"}, "groupping_id": "112", "when": "2009-12-22 10:30:00", "id": "12"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"id": "26d590f49b28bd28600455b660b23c5f", "name": "ג.אגרנטי", "title": "ד\"ר"}}, "duration": 120, "where": {"dummy": 1, "id": "c8202c01686cd2aa0c15c5a9861e6daf"}, "groupping_id": "113", "when": "2009-12-23 08:30:00", "id": "13"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "d96fec243f8901915a29c65eb311ed3f"}}, "duration": 120, "where": {"dummy": 1, "id": "8166e634c2473d298cf111b7ac2877ee"}, "groupping_id": "114", "when": "2009-12-21 12:30:00", "id": "14"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "03786f600dd9346d9612454c088ce216"}}, "duration": 120, "where": {"dummy": 1, "id": "802051968c623502d864b3652221ba61"}, "groupping_id": "115", "when": "2009-12-22 10:30:00", "id": "15"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "097200dde02b3df4c3632e88fd66292b"}}, "duration": 120, "where": {"dummy": 1, "id": "e6237c883eac77db10991e0ec4ac62f7"}, "groupping_id": "116", "when": "2009-12-23 08:30:00", "id": "16"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "כלכלה הנדסית", "notes": "קבוצה 91 לתכנית ירושלים בלבד.", "details": {"cr": 2.5, "exams": {"a": "28/07", "b": "20/10"}}, "id": "014603", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "גב", "id": "e4bc6d369c5ea1fe64425cfb3edcd66b", "name": "ש.הון-שניר"}}, "duration": 120, "where": {"dummy": 1, "id": "38d084abb1ff7efd509830e9bc1f1640"}, "groupping_id": "10", "when": "2009-12-24 14:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "5cb134e335f01b4f53efea8b97330fc1"}}, "duration": 120, "where": {"dummy": 1, "id": "12b682e67d905ef67cc1b20e61e314f8"}, "groupping_id": "11", "when": "2009-12-21 16:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "0cf2415932e2967fb6333b4147a27d76"}}, "duration": 120, "where": {"dummy": 1, "id": "fa2b26158f211b7ef88053bfa55169ae"}, "groupping_id": "12", "when": "2009-12-21 16:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "5d8be112333d3ba1ffd6d1fd6d19e745"}}, "duration": 120, "where": {"dummy": 1, "id": "196bcc9d8a29a8eb4caf028873adc472"}, "groupping_id": "13", "when": "2009-12-22 16:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "84600cb48361ed523744bcfc5c4d8b0f"}}, "duration": 120, "where": {"dummy": 1, "id": "5cff44e3595880087019582aa2326c5a"}, "groupping_id": "14", "when": "2009-12-23 14:30:00", "id": "14"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "7340872cb771e00fe7ba30e154a7e5ab"}}, "duration": 120, "where": {"dummy": 1, "id": "5b3cb23829ce4b25f1d5abccb9c20fd4"}, "groupping_id": "15", "when": "2009-12-23 14:30:00", "id": "15"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "e538e306b877b75cb0182b341125ffd6"}}, "duration": 120, "where": {"dummy": 1, "id": "5ef346c356f07b6a23dd755375d313d8"}, "groupping_id": "16", "when": "2009-12-24 16:30:00", "id": "16"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "0e974a15ceb34e6a3c2c3a5e64fa1e91"}}, "duration": 120, "where": {"dummy": 1, "id": "d605c87afac8db1f9eda891c8418eb4d"}, "groupping_id": "17", "when": "2009-12-24 16:30:00", "id": "17"}, {"parent_id": "90", "kind": "הרצאה", "details": {"who": {"title": "גב", "id": "e4bc6d369c5ea1fe64425cfb3edcd66b", "name": "ש.הון-שניר"}}, "duration": 120, "where": {"dummy": 1, "id": "a3a2bea945063123c4ec2bc91ee1a919"}, "groupping_id": "90", "when": "2009-12-24 14:30:00", "id": "90"}, {"parent_id": "90", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "fd40d8cf73be579157e82becf3b8da96"}}, "duration": 120, "where": {"dummy": 1, "id": "637532bce23390f59fc9f13316fa88f9"}, "groupping_id": "91", "when": "2009-12-24 16:30:00", "id": "91"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "בניה מתועשת", "notes": "מיועד לסטודנטים מניהול ובניה וממבנים שצברו מעל 115 נקודות.", "details": {"cr": 2.5, "exams": {"a": "26/07", "b": "16/10"}}, "id": "014605", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"dummy": 1, "id": "4746e4fc932a470e1f683e9887cd72f1"}}, "duration": 120, "where": {"dummy": 1, "id": "e03d4c8b2adb47a70cefe14336dca55d"}, "groupping_id": "10", "when": "2009-12-20 16:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "2539da9187273c6137d242bf85a474f2"}}, "duration": 60, "where": {"dummy": 1, "id": "af1baaa6734f8f493625af9b45bc1117"}, "groupping_id": "11", "when": "2009-12-20 18:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מיכון בבנייה", "notes": "בלי קורס שיטות ביצוע לא לומדים מיכון. לשאלות ניתן לפנות במייל לפרופ' שפירא עם כל הפרטים והנתונים האישיים._MY_קורס רק למסלול ניהול ובנייה סמסטר 6 ואילך.", "details": {"cr": 2.5, "exams": {"a": "07/07", "b": "03/10"}}, "id": "014609", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ.", "id": "cb0cb2fa6e91a3b3f9d54cf57eec3316", "name": "א.שפירא"}}, "duration": 120, "where": {"dummy": 1, "id": "1605d7fbafd2b9219f460bbff8266bc3"}, "groupping_id": "10", "when": "2009-12-23 09:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "a12f43c6a68fe64139560edf84d48bc0"}}, "duration": 60, "where": {"dummy": 1, "id": "88561d905623767822a13b03cae5d3c0"}, "groupping_id": "11", "when": "2009-12-23 11:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "שיטות ביצוע בבנייה", "notes": "קבוצה 91 לתכנית ירושלים בלבד.", "details": {"cr": 2.5, "exams": {"a": "23/07", "b": "19/10"}}, "id": "014610", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"id": "d58a2e61a2c8711e8f6589ccc8eefa35", "name": "י.רוזנפלד", "title": "פרופ/ח"}}, "duration": 120, "where": {"dummy": 1, "id": "4f2328a27c34274bda7acf8ae936c615"}, "groupping_id": "10", "when": "2009-12-22 08:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "82bfc2cca4e0f8371fab4b7fbef26100"}}, "duration": 60, "where": {"dummy": 1, "id": "756e7bc60b190c60a37bf2c87cbdcfea"}, "groupping_id": "11", "when": "2009-12-22 12:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "e463c52a74fef00c8ba7313e1f6f52b4"}}, "duration": 60, "where": {"dummy": 1, "id": "373f41192c6d839fc9d2e8ba9150e8d0"}, "groupping_id": "12", "when": "2009-12-22 13:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "d73b4631e84f43aad47af7927d1ebc04"}}, "duration": 60, "where": {"dummy": 1, "id": "68fad72b10bea982fc47168ebb223962"}, "groupping_id": "13", "when": "2009-12-22 14:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "651f925799445d4a99d60b8dccc1c256"}}, "duration": 60, "where": {"dummy": 1, "id": "a28c61d8cb961693db25a084f17ea19a"}, "groupping_id": "14", "when": "2009-12-23 11:30:00", "id": "14"}, {"parent_id": "90", "kind": "הרצאה", "details": {"who": {"id": "d58a2e61a2c8711e8f6589ccc8eefa35", "name": "י.רוזנפלד", "title": "פרופ/ח"}}, "duration": 120, "where": {"dummy": 1, "id": "82574eff8cb125768758dc3fa210d517"}, "groupping_id": "90", "when": "2009-12-22 08:30:00", "id": "90"}, {"parent_id": "90", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "83c13db490a370735d4759fa332dc723"}}, "duration": 60, "where": {"dummy": 1, "id": "cf29a0e7f199b1e43b761ee3f2370191"}, "groupping_id": "91", "when": "2009-12-23 11:30:00", "id": "91"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מבוא לניהול פיננסי בבנייה", "notes": "מיועד לסטודנטים מניהול ובנייה שצברו מעל 80 נקודות,לסטודנטים ממבנים שצברו מעל 100 נקודות ולסטודנטים מתחבורה שצברו מעל 100 נקודות.", "details": {"cr": 2.5, "exams": {"b": "02/10"}}, "id": "014615", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"dummy": 1, "id": "0107f7e772edef3371113166b4e3830e"}}, "duration": 120, "where": {"dummy": 1, "id": "e439a600ffd4a633169e2b378751d89f"}, "groupping_id": "10", "when": "2009-12-21 15:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "fc3e7c3c994553bf9dccd9de77ca341d"}}, "duration": 60, "where": {"dummy": 1, "id": "650c9d9b70c513fe4db1d8b9db9a8622"}, "groupping_id": "11", "when": "2009-12-21 17:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "ffa9220e051b70383881cbec339109d2"}}, "duration": 60, "where": {"dummy": 1, "id": "759257b8b2aa2c31b2054cb482260cac"}, "groupping_id": "13", "when": "2009-12-21 14:30:00", "id": "13"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "פרויקטי תשתית: שיטות וניהול", "notes": "", "details": {"cr": 3.0, "exams": {"a": "23/07", "b": "17/10"}}, "id": "014632", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "אינג.", "id": "4291b8f18634669a5c86b7e9e8a27ded", "name": "א.גליל"}}, "duration": 180, "where": {"dummy": 1, "id": "99d5f1b3f2e07dd57a826a4212482429"}, "groupping_id": "11", "when": "2009-12-23 16:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "תכן ותפעול דרכים", "notes": "", "details": {"cr": 3.0, "exams": {"a": "24/07", "b": "02/10"}}, "id": "014708", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "3dfb69df26cff1b71b315e89d3ebad59", "name": "ת.בלשה"}}, "duration": 120, "where": {"dummy": 1, "id": "232e21283a1140ea82f0692e984964b2"}, "groupping_id": "10", "when": "2009-12-23 10:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "4adfbf84cb3848a040f75357cfd12ba9"}}, "duration": 60, "where": {"dummy": 1, "id": "a78d3a1eee5e1aff6fd6db1b057498a7"}, "groupping_id": "11", "when": "2009-12-23 08:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "684ccc51a6a8154b1f9fdb04742f2dba"}}, "duration": 60, "where": {"dummy": 1, "id": "f6a973db3af7d53823df30bda8769b01"}, "groupping_id": "111", "when": "2009-12-23 09:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "5afd69c3737bc9015abbcbe72747035f"}}, "duration": 60, "where": {"dummy": 1, "id": "3123604e4c7af48c8a47b4d52e1dfdc6"}, "groupping_id": "112", "when": "2009-12-23 17:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"title": "ד\"ר", "id": "3dfb69df26cff1b71b315e89d3ebad59", "name": "ת.בלשה"}}, "duration": 60, "where": {"dummy": 1, "id": "21b31a255af3651ff1097cae30719935"}, "groupping_id": "12", "when": "2009-12-23 16:30:00", "id": "12"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מעבדת דרכים", "notes": "רישום ידני אצל ציפי בניין רבין קומה 7", "details": {"cr": 2.0, "exams": {"a": "30/07", "b": "22/10"}}, "id": "014709", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"id": "6b3cec4bd3467f0359d62779e78c21e7", "name": "א.סידס", "title": "ד\"ר"}}, "duration": 60, "where": {"dummy": 1, "id": "4c062923ec153e07c5145ffd074ef47a"}, "groupping_id": "10", "when": "2009-12-22 11:30:00", "id": "10"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "dc59dd71b69c0de6a6e05d618bff5b93"}}, "duration": 120, "where": {"dummy": 1, "id": "d3dadb0b93da115f4b50687f1fa708d2"}, "groupping_id": "111", "when": "2009-12-20 10:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "95a7eb7cd4374da1d2fc02bdcca02ff4"}}, "duration": 120, "where": {"dummy": 1, "id": "0150a516cc7f347bb36f5f0c0e3bf323"}, "groupping_id": "112", "when": "2009-12-20 12:30:00", "id": "12"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"id": "6b3cec4bd3467f0359d62779e78c21e7", "name": "א.סידס", "title": "ד\"ר"}}, "duration": 120, "where": {"dummy": 1, "id": "ae3ef85903eff1832f40120456cf60b2"}, "groupping_id": "113", "when": "2009-12-24 10:30:00", "id": "13"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "6bc4832322b36ff99caca3895c3b1b7e"}}, "duration": 120, "where": {"dummy": 1, "id": "0f919e0e0a0645b43765690b6941830f"}, "groupping_id": "114", "when": "2009-12-22 08:30:00", "id": "14"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מעבדה בתכנון תחבורה", "notes": "", "details": {"cr": 1.5, "exams": {}}, "id": "014713", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "cc71313648473d7d5c4eda3ef891f9d2", "name": "ר.אסחאק"}}, "duration": 60, "where": {"dummy": 1, "id": "5a3e61280c7072de3a8a88f24d869edf"}, "groupping_id": "10", "when": "2009-12-21 10:30:00", "id": "10"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "cb7ba61286d76cdbd9f5bcedaa493fee"}}, "duration": 60, "where": {"dummy": 1, "id": "8d9ba8621b4912f285c6565bf74e502e"}, "groupping_id": "111", "when": "2009-12-21 11:30:00", "id": "11"}, {"parent_id": "20", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "750d0086698e8ba1eef80a4878826e68"}}, "duration": 60, "where": {"dummy": 1, "id": "2ac21065f4901c8e4a2f4047f70905c2"}, "groupping_id": "121", "when": "2009-12-21 14:30:00", "id": "21"}, {"parent_id": "20", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "cc71313648473d7d5c4eda3ef891f9d2", "name": "ר.אסחאק"}}, "duration": 60, "where": {"dummy": 1, "id": "2cdcebb9e9f9e1a05c7387d0baec2fb9"}, "groupping_id": "20", "when": "2009-12-21 13:30:00", "id": "20"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "תכן מתקני תעבורה", "notes": "", "details": {"cr": 2.5, "exams": {"a": "25/07", "b": "19/10"}}, "id": "014714", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "eacb93f0624daf1db9197ffc7af0e14b", "name": "ו.אליאס"}}, "duration": 120, "where": {"dummy": 1, "id": "bba220d94ac7b1cf1794d7d209e93b6a"}, "groupping_id": "10", "when": "2009-12-22 12:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"title": "ד\"ר", "id": "eacb93f0624daf1db9197ffc7af0e14b", "name": "ו.אליאס"}}, "duration": 60, "where": {"dummy": 1, "id": "034ca4764ca8684541cc2ceaf86a2074"}, "groupping_id": "11", "when": "2009-12-22 15:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "פרויקט בתכנון תחבורה", "notes": "", "details": {"cr": 2.5, "exams": {}}, "id": "014721", "shows": [{"parent_id": "10", "kind": "קבוצה", "details": {"who": {"title": "פרופ.", "id": "8cfbe6aa62d378583a2a7f8b1aa526ed", "name": "י.שיפטן"}}, "duration": 120, "where": {"dummy": 1, "id": "ca26c74f1207b2dadb40e703ca94bb9c"}, "groupping_id": "11", "when": "2009-12-21 10:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "פרויקט בהנדסת תעבורה", "notes": "לקבוצה מספר 11 הרישום הוא ידני אצל מרצה הקורס.", "details": {"cr": 2.5, "exams": {}}, "id": "014722", "shows": [{"parent_id": "10", "kind": "קבוצה", "details": {"who": {"dummy": 1, "id": "a2af321a27d87cda16e8b6f1da69e36b"}}, "duration": 120, "where": {"dummy": 1, "id": "934af91d957144233822b15b8e596451"}, "groupping_id": "11", "when": "2009-12-20 12:30:00", "id": "11"}, {"parent_id": "10", "kind": "קבוצה", "details": {"who": {"dummy": 1, "id": "adfe732d4e5b12f8158d56728214de03"}}, "duration": 120, "where": {"dummy": 1, "id": "e74b3fc90003926a80dbe2e0a8383e91"}, "groupping_id": "12", "when": "2009-12-22 15:30:00", "id": "12"}, {"parent_id": "10", "kind": "קבוצה", "details": {"who": {"id": "06e4a9f31a69366a87c786180b88643c", "name": "ת.בלשה", "title": "ד\"ר"}}, "duration": 120, "where": {"dummy": 1, "id": "4720becd3505c4803827d54553a175ee"}, "groupping_id": "13", "when": "2009-12-23 14:30:00", "id": "13"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "פרויקט בתכן גיאומטרי של דרכים", "notes": "", "details": {"cr": 2.5, "exams": {}}, "id": "014723", "shows": [{"parent_id": "10", "kind": "קבוצה", "details": {"who": {"id": "92790eaf0271ca6a6e62b63438f1d9e8", "name": "ד.מגיד", "title": "ד\"ר"}}, "duration": 120, "where": {"dummy": 1, "id": "29b4a7c7bdf38dbdfb42439b55d98869"}, "groupping_id": "11", "when": "2009-12-21 16:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מבוא לתחבורה מסילתית", "notes": "", "details": {"cr": 2.5, "exams": {"a": "10/07", "b": "25/09"}}, "id": "014725", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "513211733193c70c20145f3965061edc", "name": "א.רבינוביץ"}}, "duration": 120, "where": {"dummy": 1, "id": "dc7712e7209c19abed69376d5f3f7a37"}, "groupping_id": "10", "when": "2009-12-22 16:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "f2585aadc390d02004e7c7b1b3243211"}}, "duration": 60, "where": {"dummy": 1, "id": "26a62762141ca25e58f2380a70cdaa4d"}, "groupping_id": "11", "when": "2009-12-20 14:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"title": "פרופ.", "id": "b6fab3f7c4e837f56fb4cf2a9c023d0d", "name": "ע.רבינוביץ"}}, "duration": 60, "where": {"dummy": 1, "id": "cd5b857d2348097ece50e0b8c2c39c72"}, "groupping_id": "12", "when": "2009-12-21 16:30:00", "id": "12"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "תכנון תשתיות תחבורה", "notes": "", "details": {"cr": 2.5, "exams": {"a": "19/07", "b": "16/10"}}, "id": "014728", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "3b64a52b504014c258511e6291b53156", "name": "ד.מגיד"}}, "duration": 120, "where": {"dummy": 1, "id": "d1a87fc877e050d143742348f05f1a80"}, "groupping_id": "10", "when": "2009-12-20 16:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"title": "ד\"ר", "id": "3b64a52b504014c258511e6291b53156", "name": "ד.מגיד"}}, "duration": 60, "where": {"dummy": 1, "id": "fac6380b98800986bc1ab6715519d0b7"}, "groupping_id": "11", "when": "2009-12-20 13:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מבוא לתכן מסעות", "notes": "הקורס יינתן ממחצית הסמסטר.", "details": {"cr": 1.5, "exams": {"a": "17/07"}}, "id": "014731", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"id": "2eaeab951b5f6ce21d449434b40cca43", "name": "א.סידס", "title": "ד\"ר"}}, "duration": 120, "where": {"dummy": 1, "id": "95db95d3c00469236a22d408fb5d1d04"}, "groupping_id": "10", "when": "2009-12-22 08:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "42a769f6633bcb443927ce6cb897df23"}}, "duration": 120, "where": {"dummy": 1, "id": "2a6e471c7a73ed4bc7370711ff9eb9b4"}, "groupping_id": "11", "when": "2009-12-22 10:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"id": "2eaeab951b5f6ce21d449434b40cca43", "name": "א.סידס", "title": "ד\"ר"}}, "duration": 120, "where": {"dummy": 1, "id": "77f0545c88c7f8e38be7d681e24b8af6"}, "groupping_id": "12", "when": "2009-12-22 12:30:00", "id": "12"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "חשבון תאום 1", "notes": "", "details": {"cr": 4.0, "exams": {"a": "13/07", "b": "03/10"}}, "id": "014814", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "d5cd0317d41a6919c75abb84dad12252", "name": "ג.אבן-צור"}}, "duration": 120, "where": {"dummy": 1, "id": "5875d6c566f54497709e5b0af449d3b2"}, "groupping_id": "10", "when": "2009-12-20 09:30:00", "id": "10"}, {"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "d5cd0317d41a6919c75abb84dad12252", "name": "ג.אבן-צור"}}, "duration": 60, "where": {"dummy": 1, "id": "0337ea219e1594d3c9f57657dc939149"}, "groupping_id": "10", "when": "2009-12-22 08:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "8148af1178b42364b4eba740d2d0f056"}}, "duration": 120, "where": {"dummy": 1, "id": "a4be953659e2694bf6a930c5e47e6a90"}, "groupping_id": "11", "when": "2009-12-21 14:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "יסודות המיפוי והמדידה 1", "notes": "קבוצות מעבדה ,11 ,12 ,18 19 מיועדות למבנים בלבד. קבוצה 91 לתכנית ירושלים בלבד._MY_הרישום לתרגילים ידני בלבד אצל עליזה בניין רבין קומה 7", "details": {"cr": 3.5, "exams": {"a": "19/07", "b": "13/10"}}, "id": "014841", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "df3e2826e65faf27709a8fe3ac2e6688", "name": "ש.דליות"}}, "duration": 120, "where": {"dummy": 1, "id": "ad513489ad67a60f1a819c60b68ce8f3"}, "groupping_id": "10", "when": "2009-12-21 14:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "04d96aad1813af0aee1d88e22b72e3ab"}}, "duration": 120, "where": {"dummy": 1, "id": "e2cb8967858713c72950a735833ac871"}, "groupping_id": "11", "when": "2009-12-22 10:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "e021c4a07ed1b92bb5ccde832e4bc1f1"}}, "duration": 120, "where": {"dummy": 1, "id": "3db9983a164f49eb6495e1745181fdab"}, "groupping_id": "111", "when": "2009-12-20 10:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "a7982e4d356dde3a7f8abe2c9597fdd9"}}, "duration": 120, "where": {"dummy": 1, "id": "8d2f8565d89ca2ea0c0c94ab391ec6f7"}, "groupping_id": "112", "when": "2009-12-20 10:30:00", "id": "12"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "c98aa47b390fce9aaabd5b71b27dac7b"}}, "duration": 120, "where": {"dummy": 1, "id": "ce5b7255e840b6a4bd0ddfb8688b3de9"}, "groupping_id": "113", "when": "2009-12-20 12:30:00", "id": "13"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "58380f5ee5d93e25eb7be6600a6301b4"}}, "duration": 120, "where": {"dummy": 1, "id": "33f302f418437a3fc652186260810352"}, "groupping_id": "114", "when": "2009-12-20 12:30:00", "id": "14"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "99fed5436318a3c4140f44001f6ab7cf"}}, "duration": 120, "where": {"dummy": 1, "id": "470c2f4e202623cb4be23ccc357e5beb"}, "groupping_id": "115", "when": "2009-12-21 08:30:00", "id": "15"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "bf27901500b67cb4e65a44997d7afba9"}}, "duration": 120, "where": {"dummy": 1, "id": "a8c6986fba55c74b40ea4b5e904242ff"}, "groupping_id": "116", "when": "2009-12-21 08:30:00", "id": "16"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "d7bd0a3d4d1efa37b7075ea53374b97a"}}, "duration": 120, "where": {"dummy": 1, "id": "c2ce6a52e0f07c993fc4dcc0a8723a94"}, "groupping_id": "117", "when": "2009-12-23 08:30:00", "id": "17"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "dfb14ebef1befc04cb401ea9437a744b"}}, "duration": 120, "where": {"dummy": 1, "id": "27e6c8a1c152ede72dc1f780ffa06fc4"}, "groupping_id": "118", "when": "2009-12-23 10:30:00", "id": "18"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "781b24721bd08bdb7697b08ed28b6181"}}, "duration": 120, "where": {"dummy": 1, "id": "a1917e0ee30c85189d3e21c4e221e5a8"}, "groupping_id": "119", "when": "2009-12-23 10:30:00", "id": "19"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "011794e05ab74a1a7b64b4b78a4d4656"}}, "duration": 120, "where": {"dummy": 1, "id": "5db1effd41dbd23c3bdbd3ed7770352d"}, "groupping_id": "12", "when": "2009-12-22 10:30:00", "id": "12"}, {"parent_id": "20", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "76a02b2e87e592664ecacb92d986cd2c"}}, "duration": 120, "where": {"dummy": 1, "id": "c7defb8c6e67610ca1b75ecb83532172"}, "groupping_id": "121", "when": "2009-12-23 12:30:00", "id": "21"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "09a6c692442aa799433746e649a3adb1"}}, "duration": 120, "where": {"dummy": 1, "id": "d0a60d9ccc747d738345d6085db7108b"}, "groupping_id": "13", "when": "2009-12-23 14:30:00", "id": "13"}, {"parent_id": "90", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "e8a7eb4ea033a05ef5dd00b615c38462"}}, "duration": 120, "where": {"dummy": 1, "id": "01399f8e8d757bd425ae991a60e910c5"}, "groupping_id": "191", "when": "2009-12-23 12:30:00", "id": "91"}, {"parent_id": "20", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "df3e2826e65faf27709a8fe3ac2e6688", "name": "ש.דליות"}}, "duration": 120, "where": {"dummy": 1, "id": "5ba7a7949fc279c97b011f5cf2873453"}, "groupping_id": "20", "when": "2009-12-21 14:30:00", "id": "20"}, {"parent_id": "90", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "df3e2826e65faf27709a8fe3ac2e6688", "name": "ש.דליות"}}, "duration": 120, "where": {"dummy": 1, "id": "77791d0bcf36d46a90535ba55cd7acfe"}, "groupping_id": "90", "when": "2009-12-21 14:30:00", "id": "90"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מבוא למיפוי ממוחשב", "notes": "", "details": {"cr": 3.0, "exams": {"a": "31/07", "b": "20/10"}}, "id": "014845", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "878db3d5cec5c6cfe8bc187c2b7e8cf0", "name": "ת.שם-טוב"}}, "duration": 120, "where": {"dummy": 1, "id": "7dc0a81f0b6c48dcb45f4bbe31d9240d"}, "groupping_id": "10", "when": "2009-12-22 16:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "0e3814ef91a789d2a9c89132990a17ad"}}, "duration": 120, "where": {"dummy": 1, "id": "3c4a3902fa4091efe3543d3f2babc393"}, "groupping_id": "11", "when": "2009-12-20 14:30:00", "id": "11"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "2bc3799325c0cecc707254730449f8e8"}}, "duration": 120, "where": {"dummy": 1, "id": "eb4a01559fcf31bc30b6e56f0bf403be"}, "groupping_id": "12", "when": "2009-12-20 14:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "075a2e1ad6c7c7bb86880a5f8ac076d0"}}, "duration": 120, "where": {"dummy": 1, "id": "ae8142371604689ebaeabcb9e27b3864"}, "groupping_id": "13", "when": "2009-12-21 16:30:00", "id": "13"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "גיאודזיה מתמטית", "notes": "", "details": {"cr": 4.0, "exams": {"a": "18/07", "b": "26/09"}}, "id": "014849", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "ד\"ר", "id": "3ea24de1916e681d14211e75f8f0cba8", "name": "י.גבאי"}}, "duration": 180, "where": {"dummy": 1, "id": "19c63bcd42a9d6cf0356a778002050a7"}, "groupping_id": "10", "when": "2009-12-20 13:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "4f094d6064950e6c8b06952764d73dc5"}}, "duration": 120, "where": {"dummy": 1, "id": "b8304b7ba403f109f0b76db5a99c86c4"}, "groupping_id": "11", "when": "2009-12-21 12:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מדידות ג'.פ.ס.", "notes": "", "details": {"cr": 3.0, "exams": {"a": "09/07", "b": "25/09"}}, "id": "014852", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "bcba424890467852100b8c732971fb88", "name": "ג.אבן-צור"}}, "duration": 60, "where": {"dummy": 1, "id": "f355a8b3c26786434be5541e3e8883df"}, "groupping_id": "10", "when": "2009-12-22 10:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "0d39a90996fb942d79fc1d0566ed1b33"}}, "duration": 120, "where": {"dummy": 1, "id": "3f3497897ad2456dfe4c60683aa00693"}, "groupping_id": "11", "when": "2009-12-20 09:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "ed6ba9f07aca65f99f70beea5727ce6f"}}, "duration": 180, "where": {"dummy": 1, "id": "e58bef02136962a4d0bf6094b5be25ca"}, "groupping_id": "111", "when": "2009-12-21 08:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "efae7529451c59ed3b8c2d3b32d84603"}}, "duration": 180, "where": {"dummy": 1, "id": "3216d7e86fd86267e686420d0578838c"}, "groupping_id": "112", "when": "2009-12-23 10:30:00", "id": "12"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "8d0a503792c8bcc3598052f5768056dd"}}, "duration": 180, "where": {"dummy": 1, "id": "c13bf729fd07cdbe1bd53b84d1db1394"}, "groupping_id": "113", "when": "2009-12-23 13:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "8ea528d288e87d93bed3a9df5636c9f9"}}, "duration": 120, "where": {"dummy": 1, "id": "84d7b6c32596e4f2ed2a302e6bd4aedc"}, "groupping_id": "12", "when": "2009-12-20 09:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "3d490e3e879e860f9361896c011ee762"}}, "duration": 120, "where": {"dummy": 1, "id": "b3e4edcda96391750aac1ba83d9d6ab2"}, "groupping_id": "13", "when": "2009-12-20 09:30:00", "id": "13"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מדידות הנדסיות מיוחדות", "notes": "", "details": {"cr": 3.0, "exams": {"a": "23/07", "b": "17/10"}}, "id": "014853", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"dummy": 1, "id": "3168b0592c1b5c6672c011b3f7ffec13"}}, "duration": 120, "where": {"dummy": 1, "id": "c8790688854ecdf1eaa1e0eecb84e9b7"}, "groupping_id": "10", "when": "2009-12-20 13:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "6239f5e57bfd87dad4c38eace1279eca"}}, "duration": 120, "where": {"dummy": 1, "id": "4127cf8f305ff705b14a627559bc76ba"}, "groupping_id": "11", "when": "2009-12-20 15:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מודלים ספרתיים של פני השטח", "notes": "", "details": {"cr": 3.0, "exams": {"a": "27/07", "b": "23/10"}}, "id": "014856", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "f12e1f26c0f147c9cba95ab490dd6d78", "name": "ש.פילין"}}, "duration": 120, "where": {"dummy": 1, "id": "e04fd7f1d1081f87fcb9f5944c7e35a2"}, "groupping_id": "10", "when": "2009-12-22 12:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "137e59e1a7d369b68dc1ad55d2669ca1"}}, "duration": 120, "where": {"dummy": 1, "id": "5407a6f71ca37fd1db3e4bdce866d7ea"}, "groupping_id": "11", "when": "2009-12-23 08:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "מערכות מידע גיאוגרפי 1", "notes": "", "details": {"cr": 3.0, "exams": {"a": "13/07", "b": "02/10"}}, "id": "014857", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ.", "id": "be295dd631b60144d0c8a1e8e1116bb6", "name": "י.גרינפלד"}}, "duration": 120, "where": {"dummy": 1, "id": "aabac6a6531ebb2b0491febd004702a6"}, "groupping_id": "10", "when": "2009-12-20 11:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "a35ac28a507545938fe51d689f0805ab"}}, "duration": 120, "where": {"dummy": 1, "id": "1c798e04584e9c384ef910166a4072b1"}, "groupping_id": "11", "when": "2009-12-23 16:30:00", "id": "11"}]},{"category": "הנדסה אזרחית וסביבתית", "title": "פוטוגרמטריה 2", "notes": "", "details": {"cr": 3.0, "exams": {"a": "18/07", "b": "13/10"}}, "id": "014858", "shows": [{"parent_id": "10", "kind": "הרצאה", "details": {"who": {"title": "פרופ/ח", "id": "2d79f87d01f8ccbde962feefad492752", "name": "ש.פילין"}}, "duration": 120, "where": {"dummy": 1, "id": "31ec1d82ec655a5de07040ee4abc3399"}, "groupping_id": "10", "when": "2009-12-21 14:30:00", "id": "10"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "997341970077871bd5f14a7b9d29c060"}}, "duration": 60, "where": {"dummy": 1, "id": "9f53aed5e708a8833370df1dd6482004"}, "groupping_id": "11", "when": "2009-12-21 13:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "00bece5afdecda50b2c9efb546540a01"}}, "duration": 120, "where": {"dummy": 1, "id": "d4db55872494950c9bc91fe7fa218828"}, "groupping_id": "111", "when": "2009-12-21 16:30:00", "id": "11"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "f80cd28c0819feb13fcb5a232c7a71b9"}}, "duration": 120, "where": {"dummy": 1, "id": "74ebbe84bc701af5ac50d2f2d697caad"}, "groupping_id": "112", "when": "2009-12-22 16:30:00", "id": "12"}, {"parent_id": "10", "kind": "מעבדה", "details": {"who": {"dummy": 1, "id": "162c9be3376b37646ad86c357052a4b0"}}, "duration": 120, "where": {"dummy": 1, "id": "f295d8c09c83665dc839ff488211f3d8"}, "groupping_id": "113", "when": "2009-12-23 10:30:00", "id": "13"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "ba402a7ada6c007fa26f3f6a2c4b0d0e"}}, "duration": 60, "where": {"dummy": 1, "id": "d3a943459ba4e9996f822d31399ca4f4"}, "groupping_id": "12", "when": "2009-12-21 13:30:00", "id": "12"}, {"parent_id": "10", "kind": "תרגיל", "details": {"who": {"dummy": 1, "id": "b12d02def8e716f72f59f464950656e8"}}, "duration": 60, "where": {"dummy": 1, "id": "4333c1fbe14cf85d05b6fa14c9b76ba8"}, "groupping_id": "13", "when": "2009-12-21 13:30:00", "id": "13"}]}
+
+            ];
+
+            var hcache = new Hash();
+            cache.each(function(movie){hcache.set(movie.id, movie);});
+
+            var selection = {};
+
+            Cookie.dispose('selection');
+            Cookie.dispose('selper');
+
+            var index = window.the_index;
+
+            window.index = index;
+
+            var friends = [];
+
+            var exams_on = false;
+
+            
+
+            
+                
+
+                    if (document.id('links').getElements('a').length < 5)
+                    {
+                        $$('.fewlink').addClass('few');
+                    }
+                    window.InDemoMode = false;
+                    document.id('s_period').value = 21;
+
+
+                    var spinner = new Spinner();
+                    spinner.show(true);
+
+                    new Request.JSON({url:'ud', noCache:true}).get({period:21, ms:new URI(window.href).getData('ms')}).addEvents({
+
+                        onSuccess: setUserData.bind({cache:cache, index:index, spinner:spinner, hcache:hcache}),
+
+                        onFailure: function(err) {
+                            if (err.status == 401)
+                                location.reload();
+                            else
+                            {
+                                alert("Oops, something went wrong! Please try again later.");
+                                history.back();
+                            }
+                        }
+                    });
+
+                    showWelcome();
+
+                
+            
+
+        });
+
+
+    </script>
+
+    <!--[if lt IE 8]>
+        <script charset="UTF-8" type="text/javascript">
+
+            function showGuide() {
+
+                if (!window.guide) {
+                    window.guide = new StickyWin({
+                        draggable: true,
+                        content: StickyWin.ui('הדרכה לכניסה ראשונה', '<div style="font-size:medium;line-height:120%"><strong style="color:red">עבודה בגלשן זה תהיה איטית מאד, אתר זה מומלץ לפתוח בכל גלשן עדכני אחר</strong><p>לטובת היכרות עם התכנה, אנא עבור על השלבים הבאים:</p><ol> <li>רחף עם עכבר מעל המקצועות בצד ימין</li> <li>בחר כמה מקצועות (קליק בודד על שורת המקצוע)</li> <li>רחף עם עכבר מעל השיעורים שנוספו</li> <li>בעמוד עזרה תוכל למצוא <a href="help?demo=1#visualaids" target="_blank">מקרא</a> לצבעים</li> <li>בחר אופציה לכל שיעור (קליק בודד על השיעור)</li> <li>סיימת, הנך מוכן לבנות מערכת משלך :)</li> </ol></div>', { width: '400px', cornerHandle: false })
+                    });
+                }
+
+                window.guide.show();
+
+            }
+
+        </script>
+    <![endif]-->
+    <style type="text/css">
+
+        html,body,div,ul,ol,li,dl,dt,dd,h1,h2,h3,h4,h5,h6,pre,form,p,blockquote,fieldset,input,abbr,article,aside,command,details,figcaption,figure,footer,header,hgroup,mark,meter,nav,output,progress,section,summary,time { margin: 0; padding: 0; }
+        h1,h2,h3,h4,h5,h6,pre,code,address,caption,cite,code,em,strong,th,figcaption { font-size: 1em; font-weight: normal; font-style: normal; }
+        fieldset,iframe { border: none; }
+        table { border-collapse: collapse; border-spacing: 0; }
+        article,aside,footer,header,hgroup,nav,section,figure,figcaption { display: block; }
+
+        .content li {
+            margin-top: 0.3em;
+        }
+        #advice {
+            font-family: sans-serif;
+            font-size: small;
+            border: 0px solid blue;
+            padding-right: 15px;
+            margin-bottom: -5px;
+            line-height: 1.3em;
+        }
+
+        #accordion {
+            font-family: sans-serif;
+            font-size: small;
+        }
+        td.few {
+            text-align: center;
+        }
+        .missing {
+            font-size: small;
+            font-style: italic;
+
+            opacity: 0.5;
+            -ms-filter:"progid:DXI5ageTransform.Microsoft.Alpha(Opacity=50)";
+            filter: alpha(opacity=50);
+        }
+
+        .faded {
+            opacity: 0.5;
+            -ms-filter:"progid:DXI5ageTransform.Microsoft.Alpha(Opacity=50)";
+            filter: alpha(opacity=50);
+        }
+
+        .blurred {
+            filter: blur(10px);
+        }
+
+        #welcome {
+            font-size: small;
+            line-height: 1.5;
+        }
+
+        table.billcnt {
+            width: 100%;
+            font-size: small;
+        }
+
+        table.billcnt td.half {
+            text-align: center;
+            padding-bottom: 0.5em;
+        }
+
+        table.billcnt td.half table {
+            margin: auto;
+            padding: auto;
+        }
+
+        table.billcnt td.half table td {
+            padding: 0.5em;
+        }
+
+        .halfopaque {
+            opacity: 0.5;
+            -ms-filter:"progid:DXI5ageTransform.Microsoft.Alpha(Opacity=50)";
+            filter: alpha(opacity=50);
+        }
+
+        table.diff {
+            border:medium; border-spacing: 1px;
+        }
+        table.diff td { padding-right: 7px; padding-left: 7px; }
+
+        table.diff td.diff_header,
+        table.diff td.diff_next
+         { padding-right: 5px; padding-left: 5px; }
+
+        .diff_header {background-color:#e0e0e0}
+        td.diff_header {text-align:right;}
+        .diff_next {background-color:#c0c0c0}
+        .diff_next a {
+            display: none;
+            visibility: hidden;
+        }
+        .diff_add {background-color:#aaffaa}
+        .diff_chg {background-color:#ffff77}
+        .diff_sub {background-color:#ffaaaa}
+        .tdsel {
+            vertical-align: top;
+            background-color: #dddddd;
+        }
+
+        #reset_form h4 {
+            display: block;
+            margin: 15px 5px 15px 0px;
+            font-weight: bold;
+        }
+    </style>
+
+    <!--[if lt IE 9]>
+        <style type='text/css'>
+            .toppanel {
+                border: 1px solid #ddd;
+            }
+            #movieselector > div.bot,
+            #movieselector > div.top {
+                border: 1px solid #ddd;
+            }
+        </style>
+    <![endif]-->
+
+<style id="defaultStickyWinStyle">div.DefaultStickyWin {font-family:verdana; font-size:11px; line-height: 13px;position: relative;}div.DefaultStickyWin div.top{-moz-user-select: none;-khtml-user-select: none;}div.DefaultStickyWin div.top_ul{background:url(/media/Assets/stickyWinHTML/full.png) top left no-repeat; height:30px; width:15px; float:left}div.DefaultStickyWin div.top_ur{position:relative; left:0px !important; left:-4px; background:url(/media/Assets/stickyWinHTML/full.png) top right !important; height:30px; margin:0px 0px 0px 15px !important; margin-right:-4px; padding:0px}div.DefaultStickyWin h1.caption{clear: none !important; margin:0px !important; overflow: hidden; padding:0 !important; font-weight:bold; color:#555; font-size:14px !important; position:relative; top:8px !important; left:5px !important; float: left; height: 22px !important;}div.DefaultStickyWin div.middle, div.DefaultStickyWin div.closeBody {background:url(/media/Assets/stickyWinHTML/body.png) top left repeat-y; margin:0px 20px 0px 0px !important; margin-bottom: -3px; position: relative; top: 0px !important; top: -3px;}div.DefaultStickyWin div.body{background:url(/media/Assets/stickyWinHTML/body.png) top right repeat-y; padding:8px 23px 8px 0px !important; margin-left:5px !important; position:relative; right:-20px !important; z-index: 1;}div.DefaultStickyWin div.bottom{clear:both;}div.DefaultStickyWin div.bottom_ll{background:url(/media/Assets/stickyWinHTML/full.png) bottom left no-repeat; width:15px; height:15px; float:left}div.DefaultStickyWin div.bottom_lr{background:url(/media/Assets/stickyWinHTML/full.png) bottom right; position:relative; left:0px !important; left:-4px; margin:0px 0px 0px 15px !important; margin-right:-4px; height:15px}div.DefaultStickyWin div.closeButtons{text-align: center; background:url(/media/Assets/stickyWinHTML/body.png) top right repeat-y; padding: 4px 30px 8px 0px; margin-left:5px; position:relative; right:-20px}div.DefaultStickyWin a.button:hover{background:url(/media/Assets/stickyWinHTML/big_button_over.gif) repeat-x}div.DefaultStickyWin a.button {background:url(/media/Assets/stickyWinHTML/big_button.gif) repeat-x; margin: 2px 8px 2px 8px; padding: 2px 12px; cursor:pointer; border: 1px solid #999 !important; text-decoration:none; color: #000 !important;}div.DefaultStickyWin div.closeButton{width:13px; height:13px; background:url(/media/Assets/stickyWinHTML/closebtn.gif) no-repeat; position: absolute; right: 0px; margin:10px 15px 0px 0px !important; cursor:pointer;top:0px}div.DefaultStickyWin div.dragHandle { width: 11px; height: 25px; position: relative; top: 5px; left: -3px; cursor: move; background: url(/media/Assets/stickyWinHTML/drag_corner.gif); float: left;}</style></head>
+<body class="rtl" onpageshow="checkPeriods(event)" onpagehide="applySelChanges(event)">
+
+    <div id="topLine">
+    <table><tbody><tr>
+            <td><div id="links">
+                
+                    <a id="logout_link" href="https://choicefreak.appspot.com/tech/sngo?next=https%3A//choicefreak.appspot.com/_ah/logout%3Fcontinue%3Dhttps%3A//www.google.com/accounts/Logout%253Fcontinue%253Dhttps%3A//appengine.google.com/_ah/logout%25253Fcontinue%25253Dhttps%3A//choicefreak.appspot.com/tech/%2525253Fl%2525253D1%2526service%253Dah">יציאה</a>
+                    <!--
+                    urialon1
+                    -->
+                
+                
+                    <a href="https://choicefreak.appspot.com/tech/help" class="progpage">תמיכה</a>
+                    
+
+                    <a id="amobile" href="https://choicefreak.appspot.com/tech/mobile?period=21" class="progpage">נייד</a>
+
+                    
+                    
+                    <a id="afriends" href="https://choicefreak.appspot.com/tech/friends" class="progpage">חברים</a>
+                    
+
+                    
+                    <a id="amods" href="https://choicefreak.appspot.com/tech/repmods?period=21" class="progpage">נתונים</a>
+                    
+
+                    
+                    
+                        <a id="atasks" href="https://choicefreak.appspot.com/tech/tasks?period=21" class="progpage">משימות</a>
+                        <!--
+                        -->
+                    
+                    
+
+                    
+
+                    
+                    <a id="alists" href="https://choicefreak.appspot.com/tech/lists?period=21" class="progpage">רשימות</a>
+                    
+
+                    
+                    <a id="aranks" href="https://choicefreak.appspot.com/tech/ranks?period=21" class="progpage">דירוג</a>
+                    
+
+                    
+                    <!--
+                    <strong style='color:red'>חדש!</strong>
+                    -->
+                <!--
+                    <a href="help#mobile" target="_blank">נייד</a>
+                -->
+                    
+                        <a id="exams_link" href="https://choicefreak.appspot.com/tech/?period=21#" class="actbut">בחינות</a>
+                    
+
+                    
+                    <a id="undo_link" class="actbut invisible">שכח <span id="nchanges"></span> שינויים</a>
+                    
+
+                
+            </div></td>
+            
+            <td class="fewlink">
+                <div id="in_period" title="נתוני הקטלוג עודכנו בתאריך Jan. 19, 2017">
+                <span class="perspan">
+                <!--
+                <a id='asched' href="/tech/" class="progpage" style="position:relative;top:1px">מערכת</a>
+                -->
+                הטכניון
+
+                
+                    <select id="s_period">
+                        
+                        <option value="0">אביב תש"ע</option>
+                        
+                        <option value="1">קיץ תש"ע</option>
+                        
+                        <option value="2">חורף תשע"א</option>
+                        
+                        <option value="3">אביב תשע"א</option>
+                        
+                        <option value="4">קיץ תשע"א</option>
+                        
+                        <option value="5">חורף תשע"ב</option>
+                        
+                        <option value="6">אביב תשע"ב</option>
+                        
+                        <option value="7">קיץ תשע"ב</option>
+                        
+                        <option value="8">חורף תשע"ג</option>
+                        
+                        <option value="9">אביב תשע"ג</option>
+                        
+                        <option value="10">קיץ תשע"ג</option>
+                        
+                        <option value="11">חורף תשע"ד</option>
+                        
+                        <option value="12">אביב תשע"ד</option>
+                        
+                        <option value="13">קיץ תשע"ד</option>
+                        
+                        <option value="14">חורף תשע"ה</option>
+                        
+                        <option value="15">אביב תשע"ה</option>
+                        
+                        <option value="16">קיץ תשע"ה</option>
+                        
+                        <option value="17">חורף תשע"ו</option>
+                        
+                        <option value="18">אביב תשע"ו</option>
+                        
+                        <option value="19">קיץ תשע"ו</option>
+                        
+                        <option value="20">חורף תשע"ז</option>
+                        
+                        <option value="21" selected="selected">אביב תשע"ז</option>
+                        
+                    </select>
+                
+
+            
+            
+            <a id="changeslink" href="https://choicefreak.appspot.com/tech/report/diff?period=21" target="_blank" class="actbut hidden">שינויים</a>
+            
+            
+
+            </span>
+            </div></td>
+            
+            <td>
+
+<!-- pure like
+-->
+
+            </td>
+            <td>
+                <div id="links2">
+                    <strong>C</strong>hoice<strong>F</strong>reak<sup style="font-size:x-small;color:red">Βeta</sup>
+                </div>
+            
+                <div style="width:150px;visibility:hidden"></div>
+            
+            </td>
+
+    </tr></tbody></table>
+    </div>
+    <div id="restofmain" class="demomask" style="visibility: visible; zoom: 1; opacity: 1;">
+
+        <div id="movieselectorcnt">
+            <div id="movieselector"><div onsubmit="return false;" class="top toppanel"><div class="multitle">מסננת מקצועות</div><div class="fui exact"><select class="dd_category"><option value="">פקולטה</option><option value="הנדסה אזרחית וסביבתית">הנדסה אזרחית וסביבתית</option><option value="הנדסת מכונות">הנדסת מכונות</option><option value="הנדסת חשמל">הנדסת חשמל</option><option value="הנדסה כימית">הנדסה כימית</option><option value="הנדסת ביוטכנולוגיה ומזון">הנדסת ביוטכנולוגיה ומזון</option><option value="הנדסת אוירונוטיקה וחלל">הנדסת אוירונוטיקה וחלל</option><option value="הנדסת תעשיה וניהול">הנדסת תעשיה וניהול</option><option value="מתמטיקה">מתמטיקה</option><option value="פיזיקה">פיזיקה</option><option value="פיסיקה">פיסיקה</option><option value="כימיה">כימיה</option><option value="ביולוגיה">ביולוגיה</option><option value="מתמטיקה שימושית">מתמטיקה שימושית</option><option value="ארכיטקטורה ובינוי ערים">ארכיטקטורה ובינוי ערים</option><option value="חינוך למדע וטכנולוגיה">חינוך למדע וטכנולוגיה</option><option value="מדעי המחשב">מדעי המחשב</option><option value="רפואה">רפואה</option><option value="מדע והנדסה של חומרים">מדע והנדסה של חומרים</option><option value="לימודים הומניסטיים ואמנויות">לימודים הומניסטיים ואמנויות</option><option value="הנדסה ביורפואית">הנדסה ביורפואית</option><option value="ספורט">ספורט</option></select></div><div class="fui text"><input></div><div class="fui radio"><input type="radio" value="הכל" name="stam0" id="stam00" defaultchecked=""><label for="stam00">הכל</label><input type="radio" value="מסומנים" name="stam0" id="stam01" defaultchecked="checked"><label for="stam01">מסומנים</label><input type="radio" value="חברים" name="stam0" id="stam02" defaultchecked=""><label for="stam02">חברים</label></div><div class="totals ">5 מקצועות, 13.5 נקודות</div></div><div class="mid"><table cellpadding="2" cellspacing="0" border="0" style="table-layout: fixed;"><tbody><tr class="table-tr-odd selected movie097209"><td class="partialtext movie"><span class="info" rel="&lt;p&gt;&lt;table&gt;&lt;/table&gt;">097209</span> - למידה חישובית ואופטימזציה מקוונת</td></tr><tr class="selected unsat movie236363"><td class="partialtext movie"><span class="info" rel="&lt;p&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;מועד א&#39;&lt;/td&gt;&lt;td&gt;18/07&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;מועד ב&#39;&lt;/td&gt;&lt;td&gt;28/09&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;">236363</span> - מערכות מסד נתונים</td></tr><tr class="table-tr-odd selected movie236700"><td class="partialtext movie"><span class="info" rel="&lt;p&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;מועד א&#39;&lt;/td&gt;&lt;td&gt;03/08&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;מועד ב&#39;&lt;/td&gt;&lt;td&gt;17/10&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;">236700</span> - תיכון תוכנה</td></tr><tr class="selected movie236801"><td class="partialtext movie"><span class="info" rel="&lt;p&gt;&lt;table&gt;&lt;/table&gt;&lt;ul&gt;קדם הכרחי מבוא לרשתות בייסיאניות .236372 סטודנטים מתקדמים עם רקע, אך ללא קדם, יוכלו להרשם ידנית אצל המרצה בתחילת הסמסטר.&lt;br&gt;סטודט העונה לקדם ישלח בקשת סטודנט ללמודי הסמכה.&lt;/ul&gt;">236801</span> - סמינר במדעי המחשב 1</td></tr><tr class="table-tr-odd selected movie236826"><td class="partialtext movie"><span class="info" rel="&lt;p&gt;&lt;table&gt;&lt;/table&gt;">236826</span> - סמינר במסדי נתונים</td></tr></tbody></table></div><div class="spinner" id="spinner-1484994458558" style="display: none;"><div class="spinner-content"><div class="spinner-img"></div></div></div><div id="friends"><div class="toppanel"><table cellpadding="2px" cellspacing="0" border="0" class="friendstbl" style="cursor: default; table-layout: fixed; width: 100%;"><thead><tr><th style="width: 1.2em;"><input type="checkbox" defaultchecked="checked"></th><th>חברים</th></tr></thead><tbody><tr class="table-tr-odd factivated"><td style="width: 1.2em;"><input type="checkbox" checked="checked"></td><td><a href="https://choicefreak.appspot.com/tech/report/selected?period=21&amp;fid=d1af82a74904b3a0a5ee8b4f41ec5939" target="_blank">אורי</a></td></tr><tr class="factivated"><td style="width: 1.2em;"><input type="checkbox" checked="checked"></td><td><a href="https://choicefreak.appspot.com/tech/report/selected?period=21&amp;fid=d1f1b8c55a037e4551bbb2803130a428" target="_blank">Lee</a></td></tr></tbody></table></div></div><div class="bot" style="visibility: hidden; display: none;"><span class="prev">&lt;&lt;</span><span class="next">&gt;&gt;</span></div><span class="share"><a class="actbut mlshare" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fchoicefreak.appspot.com%2Ftech%2Fog%2Fml%3Fms%3D236363%253A236700%253A236801%253A236826%253A097209%26psp%3D21">Share</a></span></div>
+        </div>
+
+        <div id="examspanelcnt" style="visibility: hidden; zoom: 1; opacity: 0;">
+            <div id="examspanel" class="toppanel"> <div onsubmit="return false;" style="width: 100%; height: 100%;"><div style="height: 10px; width: 100%;"><div id="row_af" title="מועדי א&#39; בתאריכים חריגים" class="exc exc_a cwd_0"></div><div id="row_bf" title="מועדי ב&#39; בתאריכים חריגים" class="exc exc_b cwd_0"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_0" title="ב&#39; 03/07/2017" class="exc exc_a cwd_1"></div><div id="row_45" title="ב&#39; 25/09/2017" class="exc exc_b cwd_1"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_1" title="ג&#39; 04/07/2017" class="exc exc_a cwd_2"></div><div id="row_46" title="ג&#39; 26/09/2017" class="exc exc_b cwd_2"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_2" title="ד&#39; 05/07/2017" class="exc exc_a cwd_3"></div><div id="row_47" title="ד&#39; 27/09/2017" class="exc exc_b cwd_3"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_3" title="ה&#39; 06/07/2017" class="exc exc_a cwd_4"></div><div id="row_48" title="ה&#39; 28/09/2017" class="exc exc_b cwd_4 selected"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_4" title="ו&#39; 07/07/2017" class="exc exc_a cwd_5"></div><div id="row_49" title="ו&#39; 29/09/2017" class="exc exc_b cwd_5"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_5" title="ש&#39; 08/07/2017" class="exc exc_a cwd_6"></div><div id="row_50" title="ש&#39; 30/09/2017" class="exc exc_b cwd_6"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_6" title="א&#39; 09/07/2017" class="exc exc_a cwd_0"></div><div id="row_51" title="א&#39; 01/10/2017" class="exc exc_b cwd_0"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_7" title="ב&#39; 10/07/2017" class="exc exc_a cwd_1"></div><div id="row_52" title="ב&#39; 02/10/2017" class="exc exc_b cwd_1"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_8" title="ג&#39; 11/07/2017" class="exc exc_a cwd_2"></div><div id="row_53" title="ג&#39; 03/10/2017" class="exc exc_b cwd_2"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_9" title="ד&#39; 12/07/2017" class="exc exc_a cwd_3"></div><div id="row_54" title="ד&#39; 04/10/2017" class="exc exc_b cwd_3"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_10" title="ה&#39; 13/07/2017" class="exc exc_a cwd_4"></div><div id="row_55" title="ה&#39; 05/10/2017" class="exc exc_b cwd_4"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_11" title="ו&#39; 14/07/2017" class="exc exc_a cwd_5"></div><div id="row_56" title="ו&#39; 06/10/2017" class="exc exc_b cwd_5"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_12" title="ש&#39; 15/07/2017" class="exc exc_a cwd_6"></div><div id="row_57" title="ש&#39; 07/10/2017" class="exc exc_b cwd_6"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_13" title="א&#39; 16/07/2017" class="exc exc_a cwd_0"></div><div id="row_58" title="א&#39; 08/10/2017" class="exc exc_b cwd_0"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_14" title="ב&#39; 17/07/2017" class="exc exc_a cwd_1"></div><div id="row_59" title="ב&#39; 09/10/2017" class="exc exc_b cwd_1"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_15" title="ג&#39; 18/07/2017" class="exc exc_a cwd_2 selected"></div><div id="row_60" title="ג&#39; 10/10/2017" class="exc exc_b cwd_2"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_16" title="ד&#39; 19/07/2017" class="exc exc_a cwd_3"></div><div id="row_61" title="ד&#39; 11/10/2017" class="exc exc_b cwd_3"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_17" title="ה&#39; 20/07/2017" class="exc exc_a cwd_4"></div><div id="row_62" title="ה&#39; 12/10/2017" class="exc exc_b cwd_4"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_18" title="ו&#39; 21/07/2017" class="exc exc_a cwd_5"></div><div id="row_63" title="ו&#39; 13/10/2017" class="exc exc_b cwd_5"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_19" title="ש&#39; 22/07/2017" class="exc exc_a cwd_6"></div><div id="row_64" title="ש&#39; 14/10/2017" class="exc exc_b cwd_6"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_20" title="א&#39; 23/07/2017" class="exc exc_a cwd_0"></div><div id="row_65" title="א&#39; 15/10/2017" class="exc exc_b cwd_0"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_21" title="ב&#39; 24/07/2017" class="exc exc_a cwd_1"></div><div id="row_66" title="ב&#39; 16/10/2017" class="exc exc_b cwd_1"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_22" title="ג&#39; 25/07/2017" class="exc exc_a cwd_2"></div><div id="row_67" title="ג&#39; 17/10/2017" class="exc exc_b cwd_2 selected"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_23" title="ד&#39; 26/07/2017" class="exc exc_a cwd_3"></div><div id="row_68" title="ד&#39; 18/10/2017" class="exc exc_b cwd_3"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_24" title="ה&#39; 27/07/2017" class="exc exc_a cwd_4"></div><div id="row_69" title="ה&#39; 19/10/2017" class="exc exc_b cwd_4"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_25" title="ו&#39; 28/07/2017" class="exc exc_a cwd_5"></div><div id="row_70" title="ו&#39; 20/10/2017" class="exc exc_b cwd_5"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_26" title="ש&#39; 29/07/2017" class="exc exc_a cwd_6"></div><div id="row_71" title="ש&#39; 21/10/2017" class="exc exc_b cwd_6"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_27" title="א&#39; 30/07/2017" class="exc exc_a cwd_0"></div><div id="row_72" title="א&#39; 22/10/2017" class="exc exc_b cwd_0"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_28" title="ב&#39; 31/07/2017" class="exc exc_a cwd_1"></div><div id="row_73" title="ב&#39; 23/10/2017" class="exc exc_b cwd_1"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_29" title="ג&#39; 01/08/2017" class="exc exc_a cwd_2"></div><div id="row_74" title="ג&#39; 24/10/2017" class="exc exc_b cwd_2"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_30" title="ד&#39; 02/08/2017" class="exc exc_a cwd_3"></div><div id="row_75" title="ד&#39; 25/10/2017" class="exc exc_b cwd_3"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_31" title="ה&#39; 03/08/2017" class="exc exc_a cwd_4 selected"></div><div id="row_76" title="ה&#39; 26/10/2017" class="exc exc_b cwd_4"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_32" title="ו&#39; 04/08/2017" class="exc exc_a cwd_5"></div><div id="row_77" title="ו&#39; 27/10/2017" class="exc exc_b cwd_5"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_33" title="ש&#39; 05/08/2017" class="exc exc_a cwd_6"></div><div id="row_78" title="ש&#39; 28/10/2017" class="exc exc_b cwd_6"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_34" title="א&#39; 06/08/2017" class="exc exc_a cwd_0"></div><div id="row_79" title="א&#39; 29/10/2017" class="exc exc_b cwd_0"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_35" title="ב&#39; 07/08/2017" class="exc exc_a cwd_1"></div><div id="row_80" title="ב&#39; 30/10/2017" class="exc exc_b cwd_1"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_36" title="ג&#39; 08/08/2017" class="exc exc_a cwd_2"></div><div id="row_81" title="ג&#39; 31/10/2017" class="exc exc_b cwd_2"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_37" title="ד&#39; 09/08/2017" class="exc exc_a cwd_3"></div><div id="row_82" title="ד&#39; 01/11/2017" class="exc exc_b cwd_3"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_38" title="ה&#39; 10/08/2017" class="exc exc_a cwd_4"></div><div id="row_83" title="ה&#39; 02/11/2017" class="exc exc_b cwd_4"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_39" title="ו&#39; 11/08/2017" class="exc exc_a cwd_5"></div><div id="row_84" title="ו&#39; 03/11/2017" class="exc exc_b cwd_5"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_40" title="ש&#39; 12/08/2017" class="exc exc_a cwd_6"></div><div id="row_85" title="ש&#39; 04/11/2017" class="exc exc_b cwd_6"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_41" title="א&#39; 13/08/2017" class="exc exc_a cwd_0"></div><div id="row_86" title="א&#39; 05/11/2017" class="exc exc_b cwd_0"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_42" title="ב&#39; 14/08/2017" class="exc exc_a cwd_1"></div><div id="row_87" title="ב&#39; 06/11/2017" class="exc exc_b cwd_1"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_43" title="ג&#39; 15/08/2017" class="exc exc_a cwd_2"></div><div id="row_88" title="ג&#39; 07/11/2017" class="exc exc_b cwd_2"></div></div><div style="height: 2.12766%; width: 100%;"><div id="row_44" title="ד&#39; 16/08/2017" class="exc exc_a cwd_3"></div><div id="row_89" title="ד&#39; 08/11/2017" class="exc exc_b cwd_3"></div></div><div style="height: 10px; width: 100%;"><div id="row_al" title="מועדי א&#39; בתאריכים חריגים" class="exc exc_a cwd_4"></div><div id="row_bl" title="מועדי ב&#39; בתאריכים חריגים" class="exc exc_b cwd_4"></div></div></div></div>
+        </div>
+
+        <div id="showselectorcnt">
+            <div id="showselector"><div id="schedwd_top" class="toppanel"><div id="sw_div" class="toppanel1"><div class="swd_daytop" style="right: 0%; width: 20%;"><div class="swdd_head">א</div><div class="swdd_cntcnt"><div id="day0" class="swdd_cnt"><div class="oovmark early_class invisible"></div><div class="oovmark late_class invisible"></div><div id="show_10" class="show kindP gid_10 selected movie_097209 vis full tight recommended " style="top: 33.3333%; height: 8.33333%; position: absolute; width: 100%; left: 0%;"><div class="showcnt"><table cellpadding="0" cellspacing="0" border="0" style="height: 100%; width: 100%; table-layout: fixed;"><tbody><tr class="table-tr-odd"><td><span>הרצאה 10<br>פרופ"מ ר.רייכרט<br><div class="small_title">למידה חישובית ואופטימזציה מקוונת</div></span></td></tr></tbody></table></div></div><div id="show_11" class="show kindC pid_10 gid_11 selected movie_097209 vis full tight recommended " style="top: 41.6667%; height: 8.33333%; position: absolute; width: 100%; left: 0%;"><div class="showcnt"><table cellpadding="0" cellspacing="0" border="0" style="height: 100%; width: 100%; table-layout: fixed;"><tbody><tr class="table-tr-odd"><td><span>תרגיל 11<br>גב ר.דרור<br><div class="small_title">למידה חישובית ואופטימזציה מקוונת</div></span></td></tr></tbody></table></div></div></div></div></div><div class="swd_daytop" style="right: 20%; width: 20%;"><div class="swdd_head">ב</div><div class="swdd_cntcnt"><div id="day1" class="swdd_cnt"><div class="oovmark early_class invisible"></div><div class="oovmark late_class invisible"></div><div id="show_11" class="show kindC pid_10 gid_11 movie_236363 shadowed letter" style="top: 25%; height: 8.33333%; position: absolute; width: 100%; left: 0%;"><div class="showcnt"><table cellpadding="0" cellspacing="0" border="0" style="height: 100%; width: 100%; table-layout: fixed;"><tbody><tr class="table-tr-odd"><td>c</td></tr></tbody></table></div></div></div></div></div><div class="swd_daytop" style="right: 40%; width: 20%;"><div class="swdd_head">ג</div><div class="swdd_cntcnt"><div id="day2" class="swdd_cnt"><div class="oovmark early_class invisible"></div><div class="oovmark late_class invisible"></div><div id="show_10" class="show kindP gid_10 movie_236363 letter recommended over_1 overlapped" style="top: 33.3333%; height: 16.6667%; position: absolute; width: 100%; left: 0%;"><div class="showcnt"><table cellpadding="0" cellspacing="0" border="0" style="height: 100%; width: 100%; table-layout: fixed;"><tbody><tr class="table-tr-odd"><td>c</td></tr></tbody></table></div></div><div id="show_10" class="show kindP gid_10 selected movie_236801 vis full" style="top: 16.6667%; height: 16.6667%; position: absolute; width: 100%; left: 0%;"><div class="showcnt"><table cellpadding="0" cellspacing="0" border="0" style="height: 100%; width: 100%; table-layout: fixed;"><tbody><tr class="table-tr-odd"><td><span>הרצאה 10<br>פרופ. ד.גייגר<br><div class="small_title">סמינר במדעי המחשב 1</div></span></td></tr></tbody></table></div></div><div id="show_10" class="show kindP gid_10 selected movie_097209 vis full recommended " style="top: 41.6667%; height: 16.6667%; position: absolute; width: 100%; left: 0%;"><div class="showcnt"><table cellpadding="0" cellspacing="0" border="0" style="height: 100%; width: 100%; table-layout: fixed;"><tbody><tr class="table-tr-odd"><td><span>הרצאה 10<br>פרופ"מ ר.רייכרט<br><div class="small_title">למידה חישובית ואופטימזציה מקוונת</div></span></td></tr></tbody></table></div></div></div></div></div><div class="swd_daytop" style="right: 60%; width: 20%;"><div class="swdd_head">ד</div><div class="swdd_cntcnt"><div id="day3" class="swdd_cnt"><div class="oovmark early_class invisible"></div><div class="oovmark late_class invisible"></div><div id="show_10" class="show kindP gid_10 selected movie_236826 vis full " style="top: 16.6667%; height: 16.6667%; position: absolute; width: 100%; left: 0%;"><div class="showcnt"><table cellpadding="0" cellspacing="0" border="0" style="height: 100%; width: 100%; table-layout: fixed;"><tbody><tr class="table-tr-odd"><td><span>הרצאה 10<br>פרופ. ע.שמואלי<br><div class="small_title">סמינר במסדי נתונים</div></span></td></tr></tbody></table></div></div><div id="show_10" class="show kindP gid_10 selected movie_236700 vis full recommended " style="top: 50%; height: 16.6667%; position: absolute; width: 100%; left: 0%;"><div class="showcnt"><table cellpadding="0" cellspacing="0" border="0" style="height: 100%; width: 100%; table-layout: fixed;"><tbody><tr class="table-tr-odd"><td><span>הרצאה 10<br>ד"ר א.ממן<br><div class="small_title">תיכון תוכנה</div></span></td></tr></tbody></table></div></div><div id="show_11" class="show kindC pid_10 gid_11 selected movie_236700 vis full tight recommended " style="top: 83.3333%; height: 8.33333%; position: absolute; width: 100%; left: 0%;"><div class="showcnt"><table cellpadding="0" cellspacing="0" border="0" style="height: 100%; width: 100%; table-layout: fixed;"><tbody><tr class="table-tr-odd"><td><span>תרגיל 11<br>מר ג.ללוש<br><div class="small_title">תיכון תוכנה</div></span></td></tr></tbody></table></div></div><div id="show_12" class="show kindC pid_10 gid_12 selected movie_236363 vis full tight" style="top: 8.33333%; height: 8.33333%; position: absolute; width: 100%; left: 0%;"><div class="showcnt"><table cellpadding="0" cellspacing="0" border="0" style="height: 100%; width: 100%; table-layout: fixed;"><tbody><tr class="table-tr-odd"><td><span>תרגיל 12<br><div class="small_title">מערכות מסד נתונים</div></span></td></tr></tbody></table></div></div></div></div></div><div class="swd_daytop" style="right: 80%; width: 20%;"><div class="swdd_head">ה</div><div class="swdd_cntcnt"><div id="day4" class="swdd_cnt"><div class="oovmark early_class invisible"></div><div class="oovmark late_class invisible"></div><div class="oovmark lateday_class invisible"></div></div></div></div></div><div class="swd_hours"><div class="swdd_head"></div><div class="swdd_cntcnt"><span class="swdh_hour" style="top: 0%;">8:30</span><span class="swdh_hour" style="top: 8.33333%;">9:30</span><span class="swdh_hour" style="top: 16.6667%;">10:30</span><span class="swdh_hour" style="top: 25%;">11:30</span><span class="swdh_hour" style="top: 33.3333%;">12:30</span><span class="swdh_hour" style="top: 41.6667%;">13:30</span><span class="swdh_hour" style="top: 50%;">14:30</span><span class="swdh_hour" style="top: 58.3333%;">15:30</span><span class="swdh_hour" style="top: 66.6667%;">16:30</span><span class="swdh_hour" style="top: 75%;">17:30</span><span class="swdh_hour" style="top: 83.3333%;">18:30</span><span class="swdh_hour" style="top: 91.6667%;">19:30</span></div></div></div></div>
+            <!--div id="showselector" style="border-left:1px solid #ddd;border-top:1px solid #ddd;border-bottom:1px solid #aaa;border-right:1px solid #aaa"></div-->
+        </div>
+
+        <!--table border='0'>
+        <div id="stamstam">
+        </div>
+            <tr >
+                <td id='movieselectorcell'>
+                    <div id='movieselector'/>
+                </td>
+                <td id='examspanelcell' class='hidden_td_panel'>
+                    <div id='examspanel'/>
+                </td>
+                <td id='showselectorcell'>
+                    <div id='showselector'/>
+                </td>
+            </tr>
+
+        </table-->
+            <!--tr class="invisible1" style="background-color:blue">
+                <td colspan="2" style="height:2em;">
+                <div style="position:relative;height:100%;width:100%;background-color:brown">
+
+                    <table class='legend' border='0' style="height:100%;width:100%">
+                        <tr>
+                            <td><div class='show friends' >שיעור עם חברים</div></td>
+                            <td><div class='show recommended' >שיעור מומלץ</div></td>
+                            <td><div class='show others' >שיעור חילופי</div></td>
+                            <td><div class='show notrecommended' >שיעור מקביל</div></td>
+                        </tr>
+                        <tr>
+                            <td><div class='show last' >אופציה אחרונה</div></td>
+                            <td><div class='show changed' >שעור עם שינויים</div></td>
+                            <td><div class='show changed selected' ><span class="changed">פרט שהשתנה</span></div></td>
+                        </tr>
+                    </table>
+
+                </div>
+                </td>
+            </tr-->
+
+
+
+    </div>
+
+<div style="visibility:hidden;display:none" id="blackhole">
+
+<div id="welcome">
+<p>
+    קבלה עבור התשלום תישלח בהקדם.
+</p>
+    תודה והמשך גלישה מהנה!
+</div>
+
+
+
+<div id="advice">
+<ul>
+<li>
+מסך זה מאפשר לבנות מערכת שעות<br>
+עבור מספר מקצועות לדוגמה.
+</li>
+<li style="padding-top:5px">
+מומלץ בחום לעשות בו שימוש<br>
+לשם ההכרות עם התוכנה.
+</li>
+</ul>
+</div>
+
+<div id="thediffs">
+<div id="diffh">
+<div style="margin:8px 3px 8px 0px">
+מקצועות שהשתנו בקטלוג אחרי בניית המערכת וטרם אישרת.
+</div>
+</div>
+<div id="diffc" class="loading">
+</div>
+<div id="diffb">
+    <table summary="Legends" style="margin-right:15px;margin-top:8px;right:8px;position:absolute">
+        <tbody><tr> <th colspan="2"> מקרא </th>
+             <td> <table border="0" summary="Colors">
+                  <tbody><tr>
+                      <td class="diff_add">נוסף</td>
+                      <td class="diff_chg">השתנה</td>
+                      <td class="diff_sub">נעלם</td>
+                  </tr>
+              </tbody></table></td>
+          </tr>
+    </tbody></table>
+</div>
+</div>
+</div>
+
+
+
+<div class="spinner" id="spinner-1484994458069" style="display: none; width: 1581px; height: 740px; position: absolute; left: 0px; top: 0px; visibility: hidden; zoom: 1; opacity: 0;"><div class="spinner-content" style="position: absolute; left: 778px; top: 358px;"><div class="spinner-img"></div></div></div></body></html>

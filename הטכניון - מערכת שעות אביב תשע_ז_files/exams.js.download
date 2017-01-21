@@ -1,0 +1,62 @@
+var ExamsPeriod=new Class({Implements:[Options,Events],options:{properties:{onsubmit:"return false;"}},property:"ExamsPeriod",initialize:function(a,d,b,e,c){this.setOptions(c);
+this.element=new Element("div",this.options.properties);
+this.mindates=b;this.ndays=e;this.title=d;this.conflicts=new Hash();
+this.buildWD(a)},buildWD:function(b){var e=100/(this.ndays+2),h=this.mindates[0].clone(),g=this.mindates[1].clone(),d=function(j){j.target.addClass("hovered");
+var k=j.target.retrieve("date").format("%x");if(this.conflicts.has(k)){this.fireEvent("exams_focused",[this.conflicts.get(k)])
+}}.bind(this),f=function(j){j.target.removeClass("hovered");
+var k=j.target.retrieve("date").format("%x");if(this.conflicts.has(k)){this.fireEvent("exams_unfocused",[this.conflicts.get(k)])
+}}.bind(this);h.decrement();g.decrement();h.getHours()||h.setHours(3);
+g.getHours()||g.setHours(3);this.element.store("ExamsPeriod",this);
+this.element.setStyles({width:"100%",height:"100%"});
+for(i=-1;i<=this.ndays;i++){var c=new Element("div"),a=new Element("div");
+if(i<0||i==this.ndays){c.set("id",i<0?"row_af":"row_al");
+a.set("id",i<0?"row_bf":"row_bl");c.set("title","מועדי א' בתאריכים חריגים");
+a.set("title","מועדי ב' בתאריכים חריגים")}else{c.set("id","row_"+i).set("title",h.format("%a' %x"));
+a.set("id","row_"+(this.ndays+i)).set("title",g.format("%a' %x"))
+}c.addClass("exc exc_a "+h.format("cwd_%w")).store("date",h.clone());
+a.addClass("exc exc_b "+g.format("cwd_%w")).store("date",g.clone());
+c.addEvents({mouseenter:d,mouseleave:f});a.addEvents({mouseenter:d,mouseleave:f});
+h.increment();g.increment();this.element.grab(new Element("div").setStyles({height:(i==-1||i==this.ndays)?"10px":(e+"%"),width:"100%"}).adopt(c,a))
+}["adopt","inject","wraps","grab","replaces","dispose"].each(function(j){this[j]=this.element[j].bind(this.element)
+},this);this.element.inject(b)},build:function(a){this.element.store("ExamsPeriod",this);
+this.element.setStyles({width:"100%",height:"100%",border:"0px solid green"});
+this.table=new HtmlTable({properties:{id:"exams_table",border:0}});
+var f=this.mindates[0].clone(),e=this.mindates[1].clone();
+f.decrement();e.decrement();var b=function(g){g.target.addClass("hovered");
+var h=g.target.retrieve("date").format("%x");if(this.conflicts.has(h)){this.fireEvent("exams_focused",[this.conflicts.get(h)])
+}}.bind(this),d=function(g){g.target.removeClass("hovered");
+var h=g.target.retrieve("date").format("%x");if(this.conflicts.has(h)){this.fireEvent("exams_unfocused",[this.conflicts.get(h)])
+}}.bind(this);for(i=-1;i<=this.ndays;i++){var c=this.table.push(["",""]);
+c.tds[0].addClass("ex_a");c.tds[1].addClass("ex_b");
+if(i<0||i==this.ndays){c.tds[0].set("id",i<0?"row_af":"row_al");
+c.tds[1].set("id",i<0?"row_bf":"row_bl");c.tds[0].addClass(f.format("cwd_%w")).store("date",f.clone());
+c.tds[1].addClass(e.format("cwd_%w")).store("date",e.clone());
+c.tr.setStyle("height","1%");c.tds[0].set("title","מועדי א' בתאריכים חריגים");
+c.tds[1].set("title","מועדי ב' בתאריכים חריגים");c.tds[0].addEvents({mouseenter:b,mouseleave:d});
+c.tds[1].addEvents({mouseenter:b,mouseleave:d})}else{c.tds[0].set("id","row_"+i).set("title",f.format("%a' %x"));
+c.tds[1].set("id","row_"+(this.ndays+i)).set("title",e.format("%a' %x"));
+c.tds[0].addClass(f.format("cwd_%w")).store("date",f.clone());
+c.tds[1].addClass(e.format("cwd_%w")).store("date",e.clone());
+c.tr.setStyle("height","2%");c.tds[0].addEvents({mouseenter:b,mouseleave:d});
+c.tds[1].addEvents({mouseenter:b,mouseleave:d})}f.increment();
+e.increment()}this.table.inject(this.element);["adopt","inject","wraps","grab","replaces","dispose"].each(function(g){this[g]=this.element[g].bind(this.element)
+},this);this.element.inject(a)},toElement:function(){return this.element
+},previewStart:function(a){this.setMovieClass(a,"preview",true)
+},previewEnd:function(a){this.setMovieClass(a,"preview",false)
+},setMovieClass:function(c,b,a){c.each(function(e,f){if(!e){return
+}var d=this.getDateCell(e,f);if(d){if(a){d.addClass(b)
+}else{d.removeClass(b)}}else{}},this)},addExam:function(b,a){b.each(function(d,g){if(!d){return
+}var c=this.getDateCell(d,g);if(c){var f=this.mindates[g].diff(d);
+var e=c.retrieve("date").format("%x");if(this.conflicts.has(e)){this.conflicts.set(e,this.conflicts.get(e).extend([a]));
+if(f<0||f>=this.ndays){c.addClass("notvisible")}else{c.addClass("conflict")
+}}else{this.conflicts.set(e,[a]);if(f<0||f>=this.ndays){c.addClass("notvisible")
+}else{c.addClass("selected")}}}},this)},getDateCell:function(b,c){var a=this.mindates[c].diff(b,"day");
+if(a<0){return this.element.getElementById("row_"+((c==0)?"af":"bf"))
+}else{if(a>=this.ndays){return this.element.getElementById("row_"+((c==0)?"al":"bl"))
+}else{return this.element.getElementById("row_"+(a+this.ndays*c))
+}}},removeExam:function(b,a){b.each(function(d,g){if(!d){return
+}var c=this.getDateCell(d,g);if(c){var f=this.mindates[g].diff(d);
+var e=c.retrieve("date").format("%x"),h=this.conflicts.get(e);
+if(h.length==1){this.conflicts.erase(e);if(f<0||f>=this.ndays){c.removeClass("notvisible")
+}else{c.removeClass("selected")}}else{if(h.length==2){if(f>=0||f<this.ndays){c.removeClass("conflict")
+}}this.conflicts.set(e,h.erase(a))}}},this)}});

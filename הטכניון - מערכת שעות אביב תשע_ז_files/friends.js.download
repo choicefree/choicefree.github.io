@@ -1,0 +1,26 @@
+var Friends=new Class({Implements:[Options,Events],options:{properties:{"class":"toppanel"}},property:"Friends",initialize:function(a,c,b){this.setOptions(b);
+this.element=new Element("div",this.options.properties);
+this.friends=c||[];this.build(a)},getEffectiveFriendsSelection:function(){return this.friends.map(function(a){return !a.active?[]:$H(a.selection).getKeys()
+}).flatten()},build:function(a){this.element.store("Friends",this);
+["adopt","inject","wraps","grab","replaces","dispose"].each(function(b){this[b]=this.element[b].bind(this.element)
+},this);this.table=new HtmlTable({properties:{"class":"friendstbl",border:0,cellpadding:"2px",styles:{cursor:"default","table-layout":"fixed",width:"100%"}}});
+this.table.setHeaders([{content:new Element("input",{type:"checkbox",checked:"checked",events:{click:function(b){if(b.target.get("checked")){this.table.toElement().getElements(".finactivated").each(function(c){this.byAll=true;
+c.getElement("input").click();this.byAll=false},this)
+}else{this.table.toElement().getElements(".factivated").each(function(c){this.byAll=true;
+c.getElement("input").click();this.byAll=false})}}.bind(this)}}),properties:{styles:{width:Browser.Engine.trident?"1.2em":"1.2em"}}},{content:"חברים"}]);
+this.friends.each(function(c){var b=this.table.push([{content:'<input type="checkbox" checked="checked"/>',properties:{styles:{width:Browser.Engine.trident?"1.2em":"1.2em"}}},{content:this.options.url?('<a href="'+this.options.url+"&fid="+c.id+'" target="_blank">'+c.name+"</a>"):c.name}]);
+b.tr.addClass(c.active?"factivated":"finactivated");
+b.tr.addEvents({mouseenter:function(d){if(!b.tds[0].getElement("input").get("checked")){return
+}var e=d.target.getParent().retrieve("item");if(!e){e=d.target.getParent().getParent().retrieve("item")
+}this.fireEvent("mouse_in",e)}.bind(this),mouseleave:function(d){if(!b.tds[0].getElement("input").get("checked")){return
+}var e=d.target.getParent().retrieve("item");if(!e){e=d.target.getParent().getParent().retrieve("item")
+}this.fireEvent("mouse_out",e)}.bind(this)}).store("item",c);
+b.tds[0].getElement("input").addEvent("click",function(d){var f=d.target.getParent().getParent();
+var e=f.retrieve("item");if(d.target.get("checked")){this.fireEvent("factivated",[e,!this.byAll]);
+f.addClass("factivated");f.removeClass("finactivated")
+}else{this.fireEvent("finactivated",[e,!this.byAll]);
+f.removeClass("factivated");f.addClass("finactivated")
+}}.bind(this));$H(c.selection).each(function(e,d){var f=d.replace(/\./g,"");
+b.tr.addClass("mf_"+f);e.each(function(g){b.tr.addClass("msf_"+f+"_"+g)
+})})},this);this.element.adopt(this.table);this.element.inject(a)
+}});

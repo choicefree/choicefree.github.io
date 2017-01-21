@@ -1,0 +1,219 @@
+var FilterField=new Class({Implements:[Events],initialize:function(c,b,d,a){this.label=c;
+this.name=b;this.kind=d;this.value="";this.re=null;
+if(a){this.values=a}},toRE:function(a){if(this.kind=="exact"){return new RegExp("^"+a.escapeRegExp()+"$")
+}if(this.kind=="start"){return new RegExp("^"+a.escapeRegExp())
+}else{return new RegExp(a.escapeRegExp())}},match:function(a){return this.re==null||a[this.name].match(this.re)!=null
+},setValue:function(a){this.preSwitch&&this.preSwitch(a);
+this.value=a;if(!this.value||this.value.length<1){this.re=null
+}else{this.re=this.toRE(a)}},getValues:function(){return this.values
+},clear:function(){this.re=null;this.value=null;this.fireEvent("clear")
+},toQuery:function(){if(!this.value||this.value.length<1){return null
+}if(this.kind=="exact"){return this.name+" =_:_"+this.value
+}else{return this.name+" >=_:_"+this.value+","+this.name+" <_:_"+this.value+String.fromCharCode(65533)
+}}});function calcIDRE(b){var a=b.escapeRegExp();return new RegExp(a.replace(/\d/g,"\\d"),"g")
+}var IDsCutFilterField=new Class({Implements:[Events],initialize:function(b,a,c){this.label=b;
+this.name=a;this.kind="contains";this.values=null;this.re=calcIDRE(c)
+},match:function(a){return this.values&&this.values.contains(a[this.name])
+},setValue:function(a){this.preSwitch&&this.preSwitch(a);
+if(!a||a.length<1){this.values=null}else{this.values=a.match(this.re)
+}},getValues:function(){return this.values},clear:function(){this.values=[];
+this.fireEvent("clear")}});var CustomFilterField=new Class({Extends:FilterField,Implements:[Events,Options],options:{widen:false},initialize:function(d,b,a,c){this.setOptions(c);
+this.parent(d,"","checkbox");this.tester=a;this.value=b
+},match:function(a){return this.tester==null||this.tester(a,this.value)
+},setValue:function(a){if(this.value!=a){this.value=a;
+if(this.options.widen){this.fireEvent(this.value?"relax":"restrict")
+}else{this.fireEvent(this.value?"restrict":"relax")
+}}},clear:function(){this.value=this.options.widen;
+this.fireEvent("clear")}});var ListFilterField=new Class({Extends:FilterField,Implements:[Events],initialize:function(d,a,c){this.lists=a;
+this.value2list=new Hash();this.currentList=null;var b=a.map(function(e){this.value2list.set(e.name,e);
+return e.name}.bind(this));this.parent(d,"lists","exact",b);
+if(c){this.setValue(c)}},match:function(a){return this.currentList==null||this.currentList.contains(a)
+},setValue:function(a){if(this.value!=a){this.value=a;
+this.currentList=this.value2list.get(a);this.fireEvent("change",this.currentList)
+}},clear:function(){if(this.value!=null){this.value=null;
+this.currentList=this.value2list.get(null);this.fireEvent("clear")
+}}});var RadioGroupField=new Class({Extends:FilterField,initialize:function(b,a){if(a){this.values=["הכל","מסומנים","חברים"];
+this.parent("","presenting","radio",this.values)}else{this.values=["הכל","מסומנים"];
+this.parent("מציג","presenting","radio",this.values)
+}this.model=b;this.value=this.model.anySelected()?this.values[1]:this.values[0]
+},clear:function(){},match:function(a){if(!this.value||this.value.length<1){return true
+}if(this.values.indexOf(this.value)==0){return true
+}if(this.values.indexOf(this.value)==2){return this.model.friendHasItem(a)
+}return this.model.isItemSelected(a)}});var FilterExpr=new Class({Extends:FilterField,initialize:function(c,b,a){this.op=c;
+this.subs=[];this.label=a;b.each(this.addSub.bind(this))
+},addSub:function(a){if(this.subs.length==this.subs.include(a).length){return
+}a.addEvent("relax",function(b){this.fireEvent("relax")
+}.bind(this));a.addEvent("restrict",function(b){this.fireEvent("restrict")
+}.bind(this));a.addEvent("reset",function(b){this.fireEvent("reset")
+}.bind(this));a.addEvent("apply",function(b){this.fireEvent("apply")
+}.bind(this))},match:function(b){var a=function(c){return c.match(b)
+};return this.op=="and"?this.subs.every(a):this.subs.some(a)
+},setValue:function(a){this.subs.each(function(b){if(b.name==this.name||this.name==null){b.setValue(a)
+}},this)},clear:function(){this.subs.each(function(a){a.clear()
+})},resetTo:function(a){this.name=a;this.subs.each(function(b){b.setValue("")
+},this)},toQuery:function(){var a=this.subs.map(function(b){return b.toQuery()||null
+}).clean().join(",");return a}});var radioStam=0,cbStam=0;
+var FilterFieldUI=new Class({Implements:[Options],options:{properties:{}},initialize:function(b,a){this.setOptions(a);
+this.field=b;this.element=new Element(b.kind=="checkbox"?"span":"div",this.options.properties);
+this.build()},build:function(){this.element.store("FilterFieldUI",this);
+this.element.addClass("fui");if(this.field.kind){this.element.addClass(this.field.kind);
+if(this.field.kind=="exact"){var c=new Element("select",{"class":"dd_"+this.field.name}).addEvent("change",function(f){(function(){var g=f.target.getSelected();
+if(g.length<1){return}this.field.setValue(g[0].value);
+this.field.fireEvent("apply")}).delay(10,this)}.bind(this));
+this.field.addEvent("clear",function(){c.set("value",null)
+});this.element.grab(c);c.grab(new Element("option",{text:this.field.label,value:null}));
+this.field.getValues().each(function(f){c.grab(new Element("option",{text:f,value:f}))
+})}else{if(this.field.kind=="radio"){this.field.getValues().each(function(h,f){var g=new Element("input",{type:"radio",value:h,name:"stam"+radioStam,id:"stam"+radioStam+""+f,checked:h==this.field.value?"checked":"",events:{click:function(j){(function(){this.field.setValue(h);
+this.field.fireEvent("apply")}).delay(10,this)}.bind(this)}});
+g.inject(this.element);this.element.grab(new Element("label",{"for":"stam"+radioStam+""+f,text:h}))
+},this);radioStam++}else{if(this.field.kind=="checkbox"){var b=new Element("input",{id:"cbStam"+cbStam,type:"checkbox",checked:this.field.value?"checked":""}).addEvent("click",function(f){this.setValue(f.target.checked)
+}.bind(this.field));this.element.adopt([b,new Element("label",{text:this.field.label,"for":"cbStam"+cbStam})]);
+cbStam++;this.field.addEvent("clear",function(){b.set("checked",this.field.value)
+}.bind(this))}}}}else{this.element.addClass("text");
+this.field.resetTo(null);var d=function(g){var f=g.target.value;
+var h=this.field.oldvalue;if(g.code==27){this.field.oldvalue="";
+g.target.value="";if(this.field.waiting){$clear(this.field.waiting)
+}this.field.setValue("");this.field.fireEvent("relax");
+return}this.field.setValue(f);if(g.code==13){this.field.oldvalue=f;
+if(this.field.waiting){$clear(this.field.waiting)}this.field.fireEvent("apply");
+return}if(h){if(h.localeCompare(f)==0){return}if(h.length>f.length){if(h.indexOf(f)==0){if(this.field.waiting){$clear(this.field.waiting)
+}this.field.waiting=(function(){this.field.fireEvent("relax")
+}).delay(500,this)}else{if(this.field.waiting){$clear(this.field.waiting)
+}this.field.waiting=(function(){this.field.fireEvent("apply")
+}).delay(500,this)}}else{if(h.length>0&&f.indexOf(h)==0){if(this.field.waiting){$clear(this.field.waiting);
+this.field.waiting=(function(){this.field.fireEvent("apply")
+}).delay(500,this);return}this.field.waiting=(function(){this.field.fireEvent("restrict")
+}).delay(500,this)}else{if(this.field.waiting){$clear(this.field.waiting)
+}this.field.waiting=(function(){this.field.fireEvent("apply")
+}).delay(500,this)}}}else{if(this.field.waiting){$clear(this.field.waiting)
+}this.field.waiting=(function(){this.field.fireEvent("restrict")
+}).delay(500,this)}this.field.oldvalue=g.target.value
+},e=this.field.label||this.field.subs.map(function(f){return f.label
+}).join(" או "),a=new Element("input",{value:e}).addEvents({keyup:d.bind(this),keydown:d.bind(this),blur:function(f){if(f.target.value==""){f.target.value=this
+}}.bind(e),focus:function(f){if(f.target.value==this){f.target.value=""
+}}.bind(e)});this.field.subs.length>0&&this.field.subs[0].addEvent("clear",function(){a.set("value",this)
+}.bind(e));this.element.grab(a)}["adopt","inject","wraps","grab","replaces","dispose"].each(function(f){this[f]=this.element[f].bind(this.element)
+},this)}});var FilterUI=new Class({Implements:[Options],options:{properties:{onsubmit:"return false;"}},property:"FilterUI",initialize:function(b,a){this.setOptions(a);
+this.filter=b;this.element=new Element("div",this.options.properties);
+this.build()},build:function(){this.element.store("FilterUI",this);
+new Element("div",{"class":"multitle",text:"מסננת מקצועות"}).inject(this);
+this.filter.subs.each(function(a){new FilterFieldUI(a).inject(this)
+},this);new Element("div",{"class":"totals invisible"}).inject(this);
+["adopt","inject","wraps","grab","replaces","dispose"].each(function(a){this[a]=this.element[a].bind(this.element)
+},this)},toElement:function(){return this.element}});
+var Paginator=new Class({Implements:[Options,Events],options:{enabled:true,properties:{}},property:"Paginator",initialize:function(b,a){this.setOptions(a);
+this.model=b;this.element=new Element("div",this.options.properties);
+this.build()},build:function(){this.element.store("Paginator",this);
+["adopt","inject","wraps","grab","replaces","dispose"].each(function(a){this[a]=this.element[a].bind(this.element)
+},this);this.prevBlank=new Element("span",{text:"<<","class":"prev"});
+this.nextBlank=new Element("span",{text:">>","class":"next"});
+this.prev=new Element("a",{text:"<<",href:"#","class":"prev",events:{click:function(a){a.stop();
+var b=this.model.getPageIndex();if(b>0){this.model.setPage(b-1)
+}a.target.blur()}.bind(this)}});this.next=new Element("a",{text:">>",href:"#","class":"next",events:{click:function(a){a.stop();
+var b=this.model.getPageIndex();if(b<this.model.getNumPages()-1){this.model.setPage(b+1)
+}a.target.blur()}.bind(this)}});this.element.adopt(this.prev);
+this.element.adopt(this.next);this.model.addEvent("ready",function(){var c=false,b=false;
+if(this.model.getPageIndex()<1){c=true;this.prev.dispose();
+this.element.grab(this.prevBlank,"top")}else{this.prevBlank.dispose();
+this.element.grab(this.prev,"top")}if(this.model.getNumPages()==0||this.model.getPageIndex()==this.model.getNumPages()-1){b=true;
+this.next.dispose();this.element.grab(this.nextBlank,"bottom")
+}else{this.nextBlank.dispose();this.element.grab(this.next,"bottom")
+}var a=c&&b||!this.options.enabled;this.element.setStyles(a?{visibility:"hidden",display:"none"}:{visibility:"visible",display:"block"});
+this.fireEvent(a?"hidden":"shown")}.bind(this))}});
+var MultiSelectWidget=new Class({Implements:[Options,Events],options:{pager:true,sharing:false,extra:false,properties:{fixed:true}},initialize:function(a,c,d,b){this.setOptions(b);
+this.location=a;this.model=c;this.tip=new Tips({className:"notestip"});
+this.tip.hide();this.nfriends=d;this.idWidth=c.idWidth;
+this.currentItem=null;this.currentRow=null;this.pagerEnabled=this.options.pager?1:0;
+this.build()},build:function(){var c={};if(this.options.properties.fixed){c["table-layout"]="fixed"
+}this.table=new HtmlTable({properties:{border:0,cellpadding:2,styles:c}});
+var d=new FilterUI(this.model.filter,{properties:{"class":"top toppanel"}});
+var b=new Element("div",{"class":"mid"});this.lower=new Element("div",{id:"friends"});
+var c=Browser.Engine.trident||this.nfriends>0?{}:{width:"100%"},a=new Paginator(this.model,{properties:{"class":"bot",styles:c},enabled:this.pagerEnabled==1}).addEvents({hidden:function(){this.extra&&this.extra.show()
+}.bind(this),shown:function(){this.extra&&this.extra.hide()
+}.bind(this)});this.model.addEvent("radio",function(e){if(e=="מסומנים"){this.sharing&&this.sharing.show()
+}else{this.sharing&&this.sharing.hide()}}.bind(this));
+document.id(this.location).empty();this.top=d.inject(this.location);
+this.mid=b.inject(this.location);if(this.nfriends>0){this.bot=this.lower.inject(this.location)
+}this.pager=a.inject(this.location);this.pagerY=this.pager.getSize().y;
+if(this.options.sharing){this.sharing=new Element("span",{"class":"share"}).inject(this.location).addEvents({}).grab(new Element("a",{"class":"actbut mlshare",text:"Share",target:"_blank"}).addEvent("click",function(){this.fireEvent("share")
+}.bind(this)))}if(this.options.extra){this.extra=new Element("div",{id:"extraframe","class":"toppanel"}).inject(this.location)
+}this.htmlTable=this.table.inject(this.mid);window.addEvent("resize",this.resize.bind(this));
+this.model.addEvent("ready",function(){this.fill();
+this.mid.unspin.delay(100,this.mid)}.bind(this));this.model.setPage(0);
+if(this.model.anySelected()){this.model.filter.fireEvent("apply")
+}this.model.addEvent("loading",function(){this.mid.spin.delay(100,this.mid)
+}.bind(this));b.addEvent("mouseleave",function(e){if(this.currentItem!=null){if(this.currentRow!=null){this.currentRow.removeClass("hovered");
+this.currentRow=null}this.model.fireEvent("mouse_out",this.currentItem);
+this.currentItem=null}}.bind(this))},resize:function(){this.table.empty();
+var c=this.table.push(this.model.getHeader()),e=this.location.getParent().getSize().y,b=this.lower?this.lower.getSize().y:0,a=this.pager.getSize().y,d=this.total_em;
+if(this.options.properties.page_size){this.total_em=this.options.properties.page_size+1
+}else{this.total_em=Math.floor((e-this.top.getSize().y-b-a*this.pagerEnabled)/(c.tr.getSize().y+1))+1;
+if(this.total_em<0||this.total_em>200){this.total_em=d
+}}this.model.setPageSize(this.total_em-1)},fill:function(){if(this.currentItem!=null){if(this.currentRow!=null){this.currentRow.removeClass("hovered");
+this.currentRow=null}this.model.fireEvent("mouse_out",this.currentItem);
+this.currentItem=null}this.table.empty();var e=this.model.getHeader(),m=null,d=this.model.getNItems(),b,a=false;
+for(i=1;i<this.total_em&&i<=d;i++){var c=this.model.getItem(i-1);
+var f=this.model.flatten(c,i-1);var k=this.table.push(f.map(function(n,h){return h==0?{content:n,properties:{"class":"partialtext"}}:n
+}));m=k.tr.addEvents({click:function(h){this.model.toggleItemSelection(this.item,this.row)
+}.bind({model:this.model,item:c,row:k.tr}),mouseenter:function(h){this.widget.currentRow=this.row;
+this.widget.currentItem=this.item;this.row.addClass("hovered");
+this.model.fireEvent("mouse_in",this.item)}.bind({model:this.model,item:c,row:k.tr,widget:this}),mouseleave:function(h){this.widget.currentRow=null;
+this.widget.currentItem=null;this.row.removeClass("hovered");
+this.model.fireEvent("mouse_out",this.item)}.bind({model:this.model,item:c,row:k.tr,widget:this})}).store("item",c);
+var l=this.model.getItemTip(c);if(l){k.tr.getElements(".info").each(function(h,n){if(l[n]){h.set("title",l[n].title);
+h.set("rel",l[n].text);h.store("item",c);this.tip.attach(h)
+}},this)}k.tds.each(function(h){h.addClass("movie")
+});if(this.model.isItemSelected(c)){m.addClass("selected");
+if(this.model.isItemUNSatable(c)){m.addClass("unsat")
+}}m.addClass("movie"+c.id.replace(/\./g,""))}if(this.extra){var g=document.id("friends"),j=g?g.getSize().y:0;
+this.extra.setStyles({top:(this.mid.getPosition().y+this.mid.getSize().y-this.pagerY+2)+"px",bottom:(j+3)+"px"})
+}}});var MultiSelectWidgetModel=new Class({Implements:[Events,Options],options:{},initialize:function(l,c,n,a,e,j,m,h,d,o){this.setOptions(o);
+this.index=l;this.cache=new Hash();this.page_index=0;
+this.page_size=0;this.indices=[];this.labels=j;this.selection=new Hash(n||{});
+var g=new RadioGroupField(this,d);g.preSwitch=function(p){if(p!="הכל"){c.clear()
+}this.fireEvent("radio",p)}.bind(this);c.addSub(g);
+this.filter=c;this.fs=[];this.period=m;this.idWidth=0;
+this.isSatable=h;this.called={};this.filter.addEvents({restrict:this.restrict.bind(this),relax:this.relax.bind(this),reset:this.reset.bind(this),apply:this.apply.bind(this)});
+var f=new Hash();e.each(function(p){f.set(p.id,p)});
+a.each(function(p){f.set(p.id,p)});l.each(function(r,q){this.indices[q]=q;
+if(f.has(r.id)){var p=f.get(r.id);this.cache.set(JSON.encode(r),p);
+this.idWidth+=r.id.length}},this);if(a&&a.length){var k=Math.round(this.idWidth/a.length),b=a[0].id.split(".").length-1;
+this.idWidth=Math.round(1+(k-b)*5+b*1.5)}else{this.idWidth=32
+}},anySelected:function(){return this.selection.getLength()>0
+},getNumPages:function(){return Math.ceil(this.indices.length/this.page_size)
+},getPageIndex:function(){return this.page_index},getHeader:function(){return["קורס"]
+},getItemTip:function(a){return this.options.tipper?this.options.tipper(a):undefined
+},getNItems:function(){return this.indices.length-this.page_size*this.page_index
+},getItem:function(c){var a=this.page_size*this.page_index+c;
+var b=this.index[this.indices[a]];var d=JSON.encode(b);
+return this.cache.get(d)},flatten:function(b,a){return this.options.flattener?this.options.flattener(b):['<span class="info">'+b.id+"</span> - "+b.title]
+},undoItemSelect:function(a){var b=$$(".movie"+a.id.replace(/\./g,""));
+b=b.length>0?b[0]:null;this.fireEvent("mouse_in",a);
+this.toggleItemSelection(a,b);this.fireEvent("mouse_out",a)
+},toggleItemSelection:function(b,c){c&&c.toggleClass("selected");
+var a=b.id;if(this.selection.has(a)){this.selection.erase(a);
+c&&c.removeClass("unsat");this.fireEvent("movie_deselected",[b,function(){this.undoItemSelect(b)
+}.bind(this)])}else{this.selection.set(a,[]);if(c&&this.isItemUNSatable(b)){c.addClass("unsat")
+}this.fireEvent("movie_selected",[b,function(){this.undoItemSelect(b)
+}.bind(this)])}},isItemUNSatable:function(a){return a&&!this.isSatable(a)
+},setFriends:function(a){this.friends=a;this.fs=this.friends.getEffectiveFriendsSelection()
+},friendHasItem:function(a){return a&&this.fs.indexOf(a.id)>=0
+},isItemSelected:function(a){return a&&this.selection.has(a.id)
+},setPage:function(a){this.page_index=a;this.augment()
+},setPageSize:function(a){this.page_size=a;this.augment()
+},apply:function(){this.index.each(function(b,a){this.indices[a]=a
+},this);this.restrict()},augment:function(){var a=this.page_size*this.page_index;
+var b=this.indices.slice(a,Math.min(this.indices.length,a+this.page_size)).filter(function(e){return !this.cache.get(JSON.encode(this.index[e]))
+},this);if(b.length){if(window.InDemoMode){alert("במצב הדגמה המידע אינו זמין");
+return}var d=b.map(function(e){return this.index[e].id
+},this),c=d.join(":");if(this.called[c]==undefined){this.called[c]=1
+}else{return}new Request.JSON({url:"movies/",onSuccess:function(e){e.each(function(f,g){this.cache.set(JSON.encode(this.index[b[g]]),f)
+},this);this.fireEvent("ready")}.bind(this),onFailure:function(){if(window.InDemoMode){alert("המידע אינו זמין במצב DEMO.")
+}else{alert("Data loading failed, please reload this page.")
+}}.bind(this)}).get({period:this.period,ids:c});this.fireEvent("loading")
+}else{this.fireEvent("ready")}},reset:function(){this.page_index=0;
+this.index.each(function(b,a){this.indices[a]=a},this);
+this.augment()},relax:function(){this.page_index=0;
+this.reset();this.restrict()},restrict:function(){this.page_index=0;
+this.indices=this.indices.filter(function(a){return this.filter.match(this.index[a])
+},this);this.augment()},getIndices:function(){}});
